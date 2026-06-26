@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
@@ -10,8 +10,12 @@ const SKILLS = ["Marketing", "Finance", "Consulting", "Entrepreneurship", "Analy
 const YEARS = ["1st", "2nd", "3rd", "Final", "Postgrad"];
 
 export default function SignUp() {
-  const { register } = useAuth();
+  const { register, user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) navigate("/dashboard", { replace: true });
+  }, [user, navigate]);
   const [form, setForm] = useState({
     name: "", email: "", password: "",
     university: "", degree: "", year: "",

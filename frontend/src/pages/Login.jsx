@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
@@ -7,10 +7,14 @@ import { useAuth } from "@/context/AuthContext";
 import { formatApiError } from "@/lib/api";
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const next = params.get("next") || "/dashboard";
+
+  useEffect(() => {
+    if (user) navigate(decodeURIComponent(next), { replace: true });
+  }, [user, navigate, next]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
