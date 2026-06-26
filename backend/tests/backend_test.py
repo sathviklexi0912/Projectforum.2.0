@@ -36,7 +36,6 @@ class TestChallenges:
         r = s.get(f"{API}/challenges")
         assert r.status_code == 200
         items = r.json()
-        titles = " ".join([i["title"] for i in items])
         assert "GrowthLab" in " ".join([i["org"] for i in items])
         assert "VentureHive" in " ".join([i["org"] for i in items])
         assert "Bharat Ventures" in " ".join([i["org"] for i in items])
