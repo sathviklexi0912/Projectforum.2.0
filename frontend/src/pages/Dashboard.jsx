@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { LayoutDashboard, Grid3x3, FileText, Briefcase, User, Plus, X, ExternalLink, Linkedin, Copy, Trash2, Pencil, Lock } from "lucide-react";
+import { LayoutDashboard, Grid3x3, FileText, Briefcase, User, Plus, X, ExternalLink, Linkedin, Copy, Trash2, Pencil, Lock, Link2 } from "lucide-react";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import ChallengeCard from "@/components/ChallengeCard";
@@ -209,19 +209,46 @@ function SubmissionsTab({ submissions, onDelete, challengesById, navigate }) {
   );
 }
 
-function ProjectsTab({ projects, onAdd, onDelete }) {
+function ProjectsTab({ projects, onAdd, onUpdate, onDelete }) {
   const [open, setOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState(null);
   const [form, setForm] = useState({ title: "", description: "", link: "", category: "Marketing", date_completed: "" });
   const [saving, setSaving] = useState(false);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+  const isEdit = !!editTarget;
+  const isLinked = isEdit && !!editTarget.source_submission_id;
+
+  const openCreate = () => {
+    setEditTarget(null);
+    setForm({ title: "", description: "", link: "", category: "Marketing", date_completed: "" });
+    setOpen(true);
+  };
+  const openEdit = (p) => {
+    setEditTarget(p);
+    setForm({
+      title: p.title || "",
+      description: p.description || "",
+      link: p.link || "",
+      category: p.category || "Marketing",
+      date_completed: p.date_completed || "",
+    });
+    setOpen(true);
+  };
+  const close = () => { setOpen(false); setEditTarget(null); };
 
   const save = async (e) => {
     e.preventDefault();
     setSaving(true);
     try {
-      await onAdd(form);
-      setOpen(false);
-      setForm({ title: "", description: "", link: "", category: "Marketing", date_completed: "" });
+      if (isEdit) {
+        const payload = isLinked
+          ? { title: form.title, description: form.description, category: form.category }
+          : form;
+        await onUpdate(editTarget.id, payload);
+      } else {
+        await onAdd(form);
+      }
+      close();
     } finally {
       setSaving(false);
     }
@@ -231,7 +258,7 @@ function ProjectsTab({ projects, onAdd, onDelete }) {
     <div data-testid="projects-tab">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <h1 className="font-display text-4xl font-extrabold tracking-tighter">My projects</h1>
-        <button onClick={() => setOpen(true)} className="pf-btn-primary" data-testid="add-project-btn">
+        <button onClick={openCreate} className="pf-btn-primary" data-testid="add-project-btn">
           <Plus size={16}/> Add project
         </button>
       </div>
@@ -244,11 +271,38 @@ function ProjectsTab({ projects, onAdd, onDelete }) {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
           {projects.map((p) => (
             <div key={p.id} className="pf-card p-6" data-testid={`my-project-${p.id}`}>
-              <div className="flex items-start justify-between mb-2">
-                <span className="pf-tag">{p.category}</span>
-                <button onClick={() => onDelete(p.id)} className="text-xs opacity-50 hover:opacity-100" title="Delete" data-testid={`delete-project-${p.id}`}>
-                  <X size={14}/>
-                </button>
+              <div className="flex items-start justify-between mb-2 gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="pf-tag">{p.category}</span>
+                  {p.source_submission_id && (
+                    <span
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider"
+                      style={{ background: "#DBF5E5", color: "#1F6B3B" }}
+                      title="Auto-linked from a challenge submission"
+                      data-testid={`linked-badge-${p.id}`}
+                    >
+                      <Link2 size={10}/> Linked
+                    </span>
+                  )}
+                </div>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => openEdit(p)}
+                    className="text-xs opacity-60 hover:opacity-100"
+                    title="Edit"
+                    data-testid={`edit-project-${p.id}`}
+                  >
+                    <Pencil size={14}/>
+                  </button>
+                  <button
+                    onClick={() => onDelete(p.id)}
+                    className="text-xs opacity-50 hover:opacity-100"
+                    title="Delete"
+                    data-testid={`delete-project-${p.id}`}
+                  >
+                    <X size={14}/>
+                  </button>
+                </div>
               </div>
               <h3 className="font-display font-extrabold text-lg mb-2">{p.title}</h3>
               <p className="text-sm mb-3 line-clamp-3" style={{ color: "var(--pf-muted)" }}>{p.description}</p>
@@ -264,12 +318,17 @@ function ProjectsTab({ projects, onAdd, onDelete }) {
       )}
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.5)" }} onClick={() => setOpen(false)}>
-          <div className="pf-card p-8 w-full max-w-lg" onClick={(e) => e.stopPropagation()} data-testid="add-project-modal">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.5)" }} onClick={close}>
+          <div className="pf-card p-8 w-full max-w-lg" onClick={(e) => e.stopPropagation()} data-testid="project-modal">
             <div className="flex justify-between items-center mb-5">
-              <h2 className="font-display text-2xl font-extrabold">Add project</h2>
-              <button onClick={() => setOpen(false)} data-testid="close-project-modal"><X size={20}/></button>
+              <h2 className="font-display text-2xl font-extrabold">{isEdit ? "Edit project" : "Add project"}</h2>
+              <button onClick={close} data-testid="close-project-modal"><X size={20}/></button>
             </div>
+            {isLinked && (
+              <div className="mb-4 px-3 py-2 rounded-lg text-xs" style={{ background: "var(--pf-tag-bg)", color: "var(--pf-secondary)" }} data-testid="linked-edit-note">
+                This project is linked to a challenge submission. The link and completion date are managed in My Submissions.
+              </div>
+            )}
             <form onSubmit={save} className="space-y-4">
               <div>
                 <label className="text-sm font-medium block mb-1.5">Title</label>
@@ -280,8 +339,18 @@ function ProjectsTab({ projects, onAdd, onDelete }) {
                 <textarea rows={3} className="pf-input" value={form.description} onChange={(e) => set("description", e.target.value)} data-testid="proj-desc" required/>
               </div>
               <div>
-                <label className="text-sm font-medium block mb-1.5">Project link</label>
-                <input type="url" className="pf-input" value={form.link} onChange={(e) => set("link", e.target.value)} data-testid="proj-link"/>
+                <label className="text-sm font-medium block mb-1.5">
+                  Project link {isLinked && <span className="text-[10px] uppercase tracking-wider ml-2" style={{ color: "var(--pf-muted)" }}>locked</span>}
+                </label>
+                <input
+                  type="url"
+                  className="pf-input"
+                  value={form.link}
+                  onChange={(e) => set("link", e.target.value)}
+                  disabled={isLinked}
+                  style={isLinked ? { opacity: 0.55, cursor: "not-allowed" } : undefined}
+                  data-testid="proj-link"
+                />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -291,12 +360,23 @@ function ProjectsTab({ projects, onAdd, onDelete }) {
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium block mb-1.5">Date completed</label>
-                  <input type="month" className="pf-input" value={form.date_completed} onChange={(e) => set("date_completed", e.target.value)} data-testid="proj-date" required/>
+                  <label className="text-sm font-medium block mb-1.5">
+                    Date completed {isLinked && <span className="text-[10px] uppercase tracking-wider ml-2" style={{ color: "var(--pf-muted)" }}>locked</span>}
+                  </label>
+                  <input
+                    type="month"
+                    className="pf-input"
+                    value={form.date_completed}
+                    onChange={(e) => set("date_completed", e.target.value)}
+                    disabled={isLinked}
+                    style={isLinked ? { opacity: 0.55, cursor: "not-allowed" } : undefined}
+                    data-testid="proj-date"
+                    required={!isEdit}
+                  />
                 </div>
               </div>
               <button type="submit" disabled={saving} className="pf-btn-primary w-full" data-testid="save-project">
-                {saving ? "Saving…" : "Save project"}
+                {saving ? "Saving…" : (isEdit ? "Save changes" : "Save project")}
               </button>
             </form>
           </div>
@@ -503,6 +583,17 @@ export default function Dashboard() {
     }
   };
 
+  const updateProject = async (pid, payload) => {
+    try {
+      const { data } = await api.patch(`/projects/${pid}`, payload);
+      setProjects((p) => p.map((x) => (x.id === pid ? data : x)));
+      toast.success("Project updated");
+    } catch (err) {
+      toast.error(formatApiError(err));
+      throw err;
+    }
+  };
+
   const deleteSubmission = async (s) => {
     if (!window.confirm(`Permanently delete your submission for "${s.challenge_title}"? This cannot be undone.`)) return;
     try {
@@ -525,7 +616,7 @@ export default function Dashboard() {
           {active === "overview" && <OverviewTab user={user} submissions={submissions} recommended={challenges} navigate={navTo} />}
           {active === "challenges" && <ChallengesTab challenges={challenges} filter={filter} setFilter={setFilter} />}
           {active === "submissions" && <SubmissionsTab submissions={submissions} onDelete={deleteSubmission} challengesById={Object.fromEntries(challenges.map(c => [c.id, c]))} navigate={navigate} />}
-          {active === "projects" && <ProjectsTab projects={projects} onAdd={addProject} onDelete={deleteProject} />}
+          {active === "projects" && <ProjectsTab projects={projects} onAdd={addProject} onUpdate={updateProject} onDelete={deleteProject} />}
           {active === "profile" && <ProfileTab user={user} updateUser={updateUser} submissions={submissions} projects={projects} />}
         </main>
       </div>

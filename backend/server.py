@@ -150,6 +150,13 @@ class ProjectIn(BaseModel):
     category: str
     date_completed: str  # "YYYY-MM"
 
+class ProjectUpdateIn(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    link: Optional[str] = None
+    category: Optional[str] = None
+    date_completed: Optional[str] = None
+
 class PendingChallengeIn(BaseModel):
     company_name: str
     contact_email: EmailStr
@@ -398,6 +405,21 @@ async def create_project(body: ProjectIn, user: dict = Depends(get_current_user)
 async def my_projects(user: dict = Depends(get_current_user)):
     items = await db.projects.find({"student_id": user["id"]}, {"_id": 0}).sort("created_at", -1).to_list(500)
     return items
+
+@api.patch("/projects/{pid}")
+async def update_project(pid: str, body: ProjectUpdateIn, user: dict = Depends(get_current_user)):
+    proj = await db.projects.find_one({"id": pid, "student_id": user["id"]})
+    if not proj:
+        raise HTTPException(status_code=404, detail="Project not found")
+    update = {k: v for k, v in body.model_dump().items() if v is not None}
+    if proj.get("source_submission_id"):
+        # Auto-linked from a submission — protect link & date_completed
+        update.pop("link", None)
+        update.pop("date_completed", None)
+    if update:
+        await db.projects.update_one({"id": pid}, {"$set": update})
+    updated = await db.projects.find_one({"id": pid}, {"_id": 0})
+    return updated
 
 @api.delete("/projects/{pid}")
 async def delete_project(pid: str, user: dict = Depends(get_current_user)):
