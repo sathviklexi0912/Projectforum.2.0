@@ -512,15 +512,17 @@ async def public_profile(student_id: str):
     if not user:
         raise HTTPException(status_code=404, detail="Profile not found")
     submissions = await db.submissions.find(
-        {
-            "student_id": student_id,
-            "$or": [
-                {"status": "Shortlisted"},
-                {"verified": True},
-            ],
-        },
+        {"student_id": student_id},
         {"_id": 0}
-    ).to_list(100)
+    ).sort("submitted_at", -1).to_list(200)
+    # Enrich with challenge category (not stored on submissions)
+    challenge_ids = list({s["challenge_id"] for s in submissions})
+    cats = {}
+    if challenge_ids:
+        async for ch in db.challenges.find({"id": {"$in": challenge_ids}}, {"_id": 0, "id": 1, "category": 1}):
+            cats[ch["id"]] = ch.get("category", "")
+    for s in submissions:
+        s["challenge_category"] = cats.get(s.get("challenge_id"), "")
     projects = await db.projects.find({"student_id": student_id}, {"_id": 0}).sort("created_at", -1).to_list(100)
     return {
         "user": serialize_user(user),

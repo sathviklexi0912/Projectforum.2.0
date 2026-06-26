@@ -77,7 +77,11 @@ export default function PublicProfile() {
               {data.completed_challenges.map((s) => (
                 <div key={s.id} className="pf-card p-6" data-testid={`completed-${s.id}`}>
                   <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
-                    <span className="pf-tag">{s.challenge_org}</span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {s.challenge_category && (
+                        <span className="pf-tag" data-testid={`category-tag-${s.id}`}>{s.challenge_category}</span>
+                      )}
+                    </div>
                     <div className="flex items-center gap-2">
                       {s.verified && (
                         <span
@@ -89,10 +93,17 @@ export default function PublicProfile() {
                           <BadgeCheck size={12}/> Verified
                         </span>
                       )}
-                      <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--pf-primary)" }}>{s.status}</span>
+                      <span
+                        className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                        style={{ background: "var(--pf-tag-bg)", color: "var(--pf-secondary)" }}
+                        data-testid={`status-badge-${s.id}`}
+                      >
+                        {s.status}
+                      </span>
                     </div>
                   </div>
-                  <h3 className="font-display font-extrabold text-lg mb-2">{s.challenge_title}</h3>
+                  <h3 className="font-display font-extrabold text-lg mb-1" data-testid={`completed-title-${s.id}`}>{s.challenge_title}</h3>
+                  <div className="text-sm font-semibold mb-2" style={{ color: "var(--pf-muted)" }} data-testid={`completed-org-${s.id}`}>{s.challenge_org}</div>
                   {s.verified && (
                     <div className="text-xs mb-2" style={{ color: "var(--pf-muted)" }} data-testid={`verifier-${s.id}`}>
                       Endorsed by <span className="font-semibold" style={{ color: "var(--pf-secondary)" }}>{s.verifier_name}</span> · {s.verifier_title}

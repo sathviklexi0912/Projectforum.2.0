@@ -1,0 +1,32 @@
+{
+  "summary": "Verified bug fix on /profile/{student_id}: public profile now returns ALL submissions (no status/verified filter) for the demo student, and PublicProfile.jsx renders every submission as a card with category tag, status badge, title, org and a Verified badge only when verified=true. Backend pytest suite expanded with a dedicated regression test asserting the 'Submitted' status is now present in the public response. All 25 backend tests pass. Frontend Playwright test confirms 8 cards rendered for the demo student with the required data-testid attributes; previously these 'Submitted' submissions were hidden.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "server.py public_profile correctly drops the prior status/verified $or filter and enriches each submission with challenge_category via a single batched query on challenges collection (good - no N+1).",
+    "PublicProfile.jsx uses data-testid on every interactive/informational element required by the spec (completed-{id}, completed-title-{id}, completed-org-{id}, category-tag-{id}, status-badge-{id}, verified-badge-{id}). Verified badge is conditionally rendered only when s.verified is true - correct.",
+    "Submissions are sorted by submitted_at desc on the backend; assertion added to test."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "Demo Student: demo@projectforum.com / Demo@123. Demo Student ID: 16ceaaa5-ad23-4010-89ad-3ed7e12fb86b. Admin password: admin123.",
+  "seed_data_creation": "No new seed data created in this iteration. Used existing demo student submissions (6-8 TEST_pending_* submissions with mixed Submitted/Shortlisted statuses and 1 verified).",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Backend regression test added: TestPublicProfile::test_public_profile_returns_all_submissions_with_category in /app/backend/tests/backend_test.py. It asserts 'Submitted' status appears, all required fields exist (challenge_category included), and ordering is submitted_at desc. Demo student id is hardcoded in that test; if DB is reseeded ensure the demo user still has at least one 'Submitted' submission.",
+  "rca of the issue": "Previous code in /api/profile/{student_id} added a Mongo filter {'$or':[{'status':{'$in':[...]}},{'verified':True}]} on submissions which hid the demo student's 'Submitted' rows. Fix removed the filter so the query is simply {'student_id': student_id} sorted by submitted_at desc; submissions are then enriched with challenge_category by joining the challenges collection. Frontend was already laid out with the required testids and conditional verified badge. Verified end-to-end via backend pytest + Playwright DOM checks."
+}

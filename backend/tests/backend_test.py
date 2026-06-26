@@ -248,3 +248,25 @@ class TestPublicProfile:
     def test_public_profile_404(self):
         r = requests.get(f"{API}/profile/nonexistent")
         assert r.status_code == 404
+
+    # Bug fix verification: completed_challenges must include ALL submissions (no status filter)
+    def test_public_profile_returns_all_submissions_with_category(self):
+        demo_id = "16ceaaa5-ad23-4010-89ad-3ed7e12fb86b"
+        r = requests.get(f"{API}/profile/{demo_id}")
+        assert r.status_code == 200
+        data = r.json()
+        subs = data["completed_challenges"]
+        assert isinstance(subs, list)
+        assert len(subs) > 0, "Demo student must have at least one submission shown publicly"
+        # Required fields on every submission
+        required = {"challenge_title", "challenge_org", "status", "verified", "challenge_category"}
+        for s in subs:
+            missing = required - set(s.keys())
+            assert not missing, f"Missing fields {missing} on submission {s}"
+            assert isinstance(s["verified"], bool)
+        # Bug fix proof: 'Submitted' status submissions must be present (previously filtered out)
+        statuses = {s["status"] for s in subs}
+        assert "Submitted" in statuses, f"Bug not fixed: 'Submitted' status missing. Got: {statuses}"
+        # Sorted by submitted_at desc
+        ts = [s.get("submitted_at") for s in subs if s.get("submitted_at")]
+        assert ts == sorted(ts, reverse=True), "Submissions not sorted by submitted_at desc"
