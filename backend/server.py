@@ -285,7 +285,7 @@ async def admin_submissions(_: bool = Depends(require_admin)):
 
 @api.patch("/admin/submissions/{sid}")
 async def update_submission_status(sid: str, body: SubmissionStatusIn, _: bool = Depends(require_admin)):
-    valid = ["Submitted", "Under Review", "Shortlisted", "Verified", "Completed"]
+    valid = ["Submitted", "Under Review", "Shortlisted", "Rejected"]
     if body.status not in valid:
         raise HTTPException(status_code=400, detail="Invalid status")
     result = await db.submissions.update_one({"id": sid}, {"$set": {"status": body.status}})
@@ -414,7 +414,7 @@ async def public_profile(student_id: str):
         {
             "student_id": student_id,
             "$or": [
-                {"status": {"$in": ["Shortlisted", "Verified", "Completed"]}},
+                {"status": "Shortlisted"},
                 {"verified": True},
             ],
         },

@@ -19,8 +19,7 @@ const STATUS_COLORS = {
   Submitted: { bg: "#EEEDFE", text: "#3C3489" },
   "Under Review": { bg: "#FFF4D6", text: "#7A5A00" },
   Shortlisted: { bg: "#D85A30", text: "#FFFFFF" },
-  Verified: { bg: "#DBF5E5", text: "#1F6B3B" },
-  Completed: { bg: "#E9DFFD", text: "#4A2E8A" },
+  Rejected: { bg: "#FAECE7", text: "#712B13" },
 };
 
 const SKILLS = ["Marketing", "Finance", "Consulting", "Entrepreneurship", "Analytics", "HR", "Operations", "Strategy"];
@@ -304,7 +303,7 @@ function ProfileTab({ user, updateUser, submissions, projects }) {
     }
   };
 
-  const completedSubs = submissions.filter((s) => ["Shortlisted", "Verified", "Completed"].includes(s.status));
+  const completedSubs = submissions.filter((s) => s.status === "Shortlisted" || s.verified);
 
   const copyProfileLink = () => {
     const url = `${window.location.origin}/profile/${user.id}`;
