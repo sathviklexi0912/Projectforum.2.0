@@ -279,20 +279,27 @@ async def create_submission(body: SubmissionIn, user: dict = Depends(get_current
     await db.submissions.insert_one(sub)
     sub.pop("_id", None)
 
-    # Auto-create a portfolio project for this submission
-    today = datetime.now(timezone.utc)
-    project = {
-        "id": str(uuid.uuid4()),
+    # Auto-create a portfolio project for this submission (skip if one already exists for this challenge)
+    existing_project = await db.projects.find_one({
         "student_id": user["id"],
-        "title": challenge.get("title", ""),
-        "description": body.explanation,
-        "link": body.submission_link,
-        "category": challenge.get("category", "Other"),
-        "date_completed": today.strftime("%Y-%m"),
-        "source_submission_id": sub["id"],
-        "created_at": now_iso(),
-    }
-    await db.projects.insert_one(project)
+        "challenge_id": body.challenge_id,
+    })
+    if not existing_project:
+        today = datetime.now(timezone.utc)
+        project = {
+            "id": str(uuid.uuid4()),
+            "student_id": user["id"],
+            "challenge_id": body.challenge_id,
+            "title": challenge.get("title", ""),
+            "description": body.explanation,
+            "link": body.submission_link,
+            "category": challenge.get("category", "Other"),
+            "date_completed": today.strftime("%Y-%m"),
+            "source_submission_id": sub["id"],
+            "submission_linked": True,
+            "created_at": now_iso(),
+        }
+        await db.projects.insert_one(project)
 
     return sub
 
@@ -412,7 +419,7 @@ async def update_project(pid: str, body: ProjectUpdateIn, user: dict = Depends(g
     if not proj:
         raise HTTPException(status_code=404, detail="Project not found")
     update = {k: v for k, v in body.model_dump().items() if v is not None}
-    if proj.get("source_submission_id"):
+    if proj.get("source_submission_id") or proj.get("submission_linked"):
         # Auto-linked from a submission — protect link & date_completed
         update.pop("link", None)
         update.pop("date_completed", None)
@@ -616,6 +623,43 @@ async def seed_data():
     await db.submissions.update_many(
         {"verified": {"$exists": False}},
         {"$set": {"verified": False, "verifier_name": "", "verifier_title": ""}},
+    )
+
+    # Backfill auto-projects for submissions that don't yet have a linked project
+    async for sub in db.submissions.find({}, {"_id": 0}):
+        existing = await db.projects.find_one({
+            "student_id": sub["student_id"],
+            "challenge_id": sub["challenge_id"],
+        })
+        if existing:
+            continue
+        ch = await db.challenges.find_one({"id": sub["challenge_id"]}, {"_id": 0})
+        if not ch:
+            continue
+        # use the submission's submitted_at month for date_completed
+        try:
+            submitted = datetime.fromisoformat(sub.get("submitted_at", now_iso()))
+        except ValueError:
+            submitted = datetime.now(timezone.utc)
+        project = {
+            "id": str(uuid.uuid4()),
+            "student_id": sub["student_id"],
+            "challenge_id": sub["challenge_id"],
+            "title": ch.get("title", ""),
+            "description": sub.get("explanation", ""),
+            "link": sub.get("submission_link", ""),
+            "category": ch.get("category", "Other"),
+            "date_completed": submitted.strftime("%Y-%m"),
+            "source_submission_id": sub["id"],
+            "submission_linked": True,
+            "created_at": now_iso(),
+        }
+        await db.projects.insert_one(project)
+
+    # Flag legacy auto-projects (those with source_submission_id but missing the boolean)
+    await db.projects.update_many(
+        {"source_submission_id": {"$nin": [None, ""], "$exists": True}, "submission_linked": {"$exists": False}},
+        {"$set": {"submission_linked": True}},
     )
 
 @app.on_event("startup")

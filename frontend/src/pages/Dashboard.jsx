@@ -216,7 +216,7 @@ function ProjectsTab({ projects, onAdd, onUpdate, onDelete }) {
   const [saving, setSaving] = useState(false);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const isEdit = !!editTarget;
-  const isLinked = isEdit && !!editTarget.source_submission_id;
+  const isLinked = isEdit && (!!editTarget.source_submission_id || !!editTarget.submission_linked);
 
   const openCreate = () => {
     setEditTarget(null);
@@ -274,7 +274,7 @@ function ProjectsTab({ projects, onAdd, onUpdate, onDelete }) {
               <div className="flex items-start justify-between mb-2 gap-2">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="pf-tag">{p.category}</span>
-                  {p.source_submission_id && (
+                  {(p.source_submission_id || p.submission_linked) && (
                     <span
                       className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider"
                       style={{ background: "#DBF5E5", color: "#1F6B3B" }}
