@@ -37,6 +37,9 @@ function App() {
             <Route path="/submit/:challengeId" element={
               <ProtectedRoute><SubmissionForm /></ProtectedRoute>
             } />
+            <Route path="/submissions/:submissionId/edit" element={
+              <ProtectedRoute><SubmissionForm mode="edit" /></ProtectedRoute>
+            } />
             <Route path="/thank-you" element={
               <ProtectedRoute><ThankYou /></ProtectedRoute>
             } />

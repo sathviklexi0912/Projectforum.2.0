@@ -294,6 +294,36 @@ async def my_submissions(user: dict = Depends(get_current_user)):
     items = await db.submissions.find({"student_id": user["id"]}, {"_id": 0}).sort("submitted_at", -1).to_list(500)
     return items
 
+@api.get("/submissions/{sid}")
+async def get_my_submission(sid: str, user: dict = Depends(get_current_user)):
+    sub = await db.submissions.find_one({"id": sid, "student_id": user["id"]}, {"_id": 0})
+    if not sub:
+        raise HTTPException(status_code=404, detail="Submission not found")
+    return sub
+
+@api.patch("/submissions/{sid}")
+async def update_my_submission(sid: str, body: SubmissionIn, user: dict = Depends(get_current_user)):
+    sub = await db.submissions.find_one({"id": sid, "student_id": user["id"]})
+    if not sub:
+        raise HTTPException(status_code=404, detail="Submission not found")
+    challenge = await db.challenges.find_one({"id": sub["challenge_id"]})
+    if challenge and challenge.get("deadline"):
+        try:
+            deadline = datetime.fromisoformat(challenge["deadline"])
+            if deadline < datetime.now(timezone.utc):
+                raise HTTPException(status_code=400, detail="Deadline has passed")
+        except ValueError:
+            pass
+    update = {
+        "submission_link": body.submission_link,
+        "explanation": body.explanation,
+        "time_spent": body.time_spent,
+        "key_learning": body.key_learning,
+    }
+    await db.submissions.update_one({"id": sid}, {"$set": update})
+    updated = await db.submissions.find_one({"id": sid}, {"_id": 0})
+    return updated
+
 @api.get("/admin/submissions")
 async def admin_submissions(_: bool = Depends(require_admin)):
     items = await db.submissions.find({}, {"_id": 0}).sort("submitted_at", -1).to_list(1000)
