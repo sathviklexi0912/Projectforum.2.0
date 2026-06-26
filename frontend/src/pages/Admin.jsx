@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Check, X, ExternalLink, LogOut } from "lucide-react";
+import { Check, X, ExternalLink, LogOut, ShieldCheck, BadgeCheck } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { api, formatApiError } from "@/lib/api";
 
@@ -119,6 +119,57 @@ export default function Admin() {
     }
   };
 
+  const [verifyTarget, setVerifyTarget] = useState(null); // submission obj or null
+  const [verifierName, setVerifierName] = useState("");
+  const [verifierTitle, setVerifierTitle] = useState("");
+  const [verifying, setVerifying] = useState(false);
+
+  const openVerify = (sub) => {
+    setVerifyTarget(sub);
+    setVerifierName(sub.verifier_name || "");
+    setVerifierTitle(sub.verifier_title || "");
+  };
+  const closeVerify = () => {
+    setVerifyTarget(null);
+    setVerifierName("");
+    setVerifierTitle("");
+  };
+
+  const submitVerify = async (e) => {
+    e.preventDefault();
+    if (!verifyTarget) return;
+    setVerifying(true);
+    try {
+      await api.post(`/admin/submissions/${verifyTarget.id}/verify`, {
+        verifier_name: verifierName,
+        verifier_title: verifierTitle,
+      });
+      setSubmissions((xs) => xs.map((x) =>
+        x.id === verifyTarget.id
+          ? { ...x, verified: true, verifier_name: verifierName, verifier_title: verifierTitle }
+          : x
+      ));
+      toast.success("Submission verified");
+      closeVerify();
+    } catch (err) {
+      toast.error(formatApiError(err));
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  const unverify = async (sid) => {
+    try {
+      await api.delete(`/admin/submissions/${sid}/verify`);
+      setSubmissions((xs) => xs.map((x) =>
+        x.id === sid ? { ...x, verified: false, verifier_name: "", verifier_title: "" } : x
+      ));
+      toast.success("Verification removed");
+    } catch (err) {
+      toast.error(formatApiError(err));
+    }
+  };
+
   if (!authed) {
     return (
       <div className="App" data-testid="admin-page-login">
@@ -167,14 +218,14 @@ export default function Admin() {
               <table className="w-full text-sm">
                 <thead style={{ background: "var(--pf-tag-bg)" }}>
                   <tr>
-                    {["Student", "University", "Challenge", "Link", "Date", "Status"].map((h) => (
+                    {["Student", "University", "Challenge", "Link", "Date", "Status", "Verify"].map((h) => (
                       <th key={h} className="text-left px-5 py-3 font-display font-bold text-xs uppercase tracking-wider" style={{ color: "var(--pf-secondary)" }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {submissions.length === 0 && (
-                    <tr><td colSpan={6} className="text-center py-12 text-sm" style={{ color: "var(--pf-muted)" }}>No submissions yet.</td></tr>
+                    <tr><td colSpan={7} className="text-center py-12 text-sm" style={{ color: "var(--pf-muted)" }}>No submissions yet.</td></tr>
                   )}
                   {submissions.map((s) => {
                     const sc = STATUS_COLORS[s.status] || STATUS_COLORS.Submitted;
@@ -199,6 +250,36 @@ export default function Admin() {
                           >
                             {STATUSES.map((st) => <option key={st} value={st} style={{ background: "#fff", color: "#000" }}>{st}</option>)}
                           </select>
+                        </td>
+                        <td className="px-5 py-4">
+                          {s.verified ? (
+                            <div className="flex items-center gap-2">
+                              <span
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                                style={{ background: "#DBF5E5", color: "#1F6B3B" }}
+                                title={`${s.verifier_name} · ${s.verifier_title}`}
+                                data-testid={`admin-verified-badge-${s.id}`}
+                              >
+                                <BadgeCheck size={12}/> Verified
+                              </span>
+                              <button
+                                onClick={() => unverify(s.id)}
+                                className="text-[11px] underline opacity-60 hover:opacity-100"
+                                data-testid={`admin-unverify-${s.id}`}
+                              >
+                                undo
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => openVerify(s)}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-colors"
+                              style={{ background: "var(--pf-tag-bg)", color: "var(--pf-secondary)" }}
+                              data-testid={`admin-verify-btn-${s.id}`}
+                            >
+                              <ShieldCheck size={12}/> Verify
+                            </button>
+                          )}
                         </td>
                       </tr>
                     );
@@ -239,6 +320,54 @@ export default function Admin() {
           </div>
         )}
       </main>
+
+      {verifyTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.5)" }}
+          onClick={closeVerify}
+          data-testid="verify-modal"
+        >
+          <div className="pf-card p-8 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h2 className="font-display text-2xl font-extrabold tracking-tighter">Verify submission</h2>
+                <p className="text-xs mt-1" style={{ color: "var(--pf-muted)" }}>
+                  Endorsing {verifyTarget.student_name}&#39;s work on &ldquo;{verifyTarget.challenge_title}&rdquo;
+                </p>
+              </div>
+              <button onClick={closeVerify} data-testid="verify-modal-close"><X size={18}/></button>
+            </div>
+            <form onSubmit={submitVerify} className="space-y-4">
+              <div>
+                <label className="text-sm font-medium block mb-1.5">Verifier&#39;s name</label>
+                <input
+                  className="pf-input"
+                  value={verifierName}
+                  onChange={(e) => setVerifierName(e.target.value)}
+                  placeholder="e.g. Dr. Anjali Rao"
+                  data-testid="verify-name"
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium block mb-1.5">Title</label>
+                <input
+                  className="pf-input"
+                  value={verifierTitle}
+                  onChange={(e) => setVerifierTitle(e.target.value)}
+                  placeholder="e.g. Professor / Industry Expert"
+                  data-testid="verify-title"
+                  required
+                />
+              </div>
+              <button type="submit" disabled={verifying} className="pf-btn-primary w-full" data-testid="verify-submit">
+                {verifying ? "Verifying…" : "Mark as verified"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

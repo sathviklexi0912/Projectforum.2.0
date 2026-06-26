@@ -139,6 +139,10 @@ class SubmissionIn(BaseModel):
 class SubmissionStatusIn(BaseModel):
     status: str
 
+class VerifyIn(BaseModel):
+    verifier_name: str
+    verifier_title: str
+
 class ProjectIn(BaseModel):
     title: str
     description: str
@@ -260,6 +264,9 @@ async def create_submission(body: SubmissionIn, user: dict = Depends(get_current
         "time_spent": body.time_spent,
         "key_learning": body.key_learning,
         "status": "Submitted",
+        "verified": False,
+        "verifier_name": "",
+        "verifier_title": "",
         "submitted_at": now_iso(),
     }
     await db.submissions.insert_one(sub)
@@ -282,6 +289,30 @@ async def update_submission_status(sid: str, body: SubmissionStatusIn, _: bool =
     if body.status not in valid:
         raise HTTPException(status_code=400, detail="Invalid status")
     result = await db.submissions.update_one({"id": sid}, {"$set": {"status": body.status}})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Submission not found")
+    return {"ok": True}
+
+@api.post("/admin/submissions/{sid}/verify")
+async def verify_submission(sid: str, body: VerifyIn, _: bool = Depends(require_admin)):
+    name = body.verifier_name.strip()
+    title = body.verifier_title.strip()
+    if not name or not title:
+        raise HTTPException(status_code=400, detail="Verifier name and title are required")
+    result = await db.submissions.update_one(
+        {"id": sid},
+        {"$set": {"verified": True, "verifier_name": name, "verifier_title": title}},
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Submission not found")
+    return {"ok": True}
+
+@api.delete("/admin/submissions/{sid}/verify")
+async def unverify_submission(sid: str, _: bool = Depends(require_admin)):
+    result = await db.submissions.update_one(
+        {"id": sid},
+        {"$set": {"verified": False, "verifier_name": "", "verifier_title": ""}},
+    )
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Submission not found")
     return {"ok": True}
@@ -380,7 +411,13 @@ async def public_profile(student_id: str):
     if not user:
         raise HTTPException(status_code=404, detail="Profile not found")
     submissions = await db.submissions.find(
-        {"student_id": student_id, "status": {"$in": ["Shortlisted", "Verified", "Completed"]}},
+        {
+            "student_id": student_id,
+            "$or": [
+                {"status": {"$in": ["Shortlisted", "Verified", "Completed"]}},
+                {"verified": True},
+            ],
+        },
         {"_id": 0}
     ).to_list(100)
     projects = await db.projects.find({"student_id": student_id}, {"_id": 0}).sort("created_at", -1).to_list(100)
@@ -492,6 +529,12 @@ async def seed_data():
     await db.challenges.create_index("id", unique=True)
     await db.submissions.create_index("student_id")
     await db.projects.create_index("student_id")
+
+    # Backfill verification fields for legacy submissions
+    await db.submissions.update_many(
+        {"verified": {"$exists": False}},
+        {"$set": {"verified": False, "verifier_name": "", "verifier_title": ""}},
+    )
 
 @app.on_event("startup")
 async def on_startup():

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Linkedin, GraduationCap, BookOpen, ExternalLink } from "lucide-react";
+import { Linkedin, GraduationCap, BookOpen, ExternalLink, BadgeCheck } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { api, initialsFromName } from "@/lib/api";
@@ -57,11 +57,28 @@ export default function PublicProfile() {
             <div className="grid md:grid-cols-2 gap-4">
               {data.completed_challenges.map((s) => (
                 <div key={s.id} className="pf-card p-6" data-testid={`completed-${s.id}`}>
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
                     <span className="pf-tag">{s.challenge_org}</span>
-                    <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--pf-primary)" }}>{s.status}</span>
+                    <div className="flex items-center gap-2">
+                      {s.verified && (
+                        <span
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                          style={{ background: "#DBF5E5", color: "#1F6B3B" }}
+                          title={`${s.verifier_name} · ${s.verifier_title}`}
+                          data-testid={`verified-badge-${s.id}`}
+                        >
+                          <BadgeCheck size={12}/> Verified
+                        </span>
+                      )}
+                      <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--pf-primary)" }}>{s.status}</span>
+                    </div>
                   </div>
                   <h3 className="font-display font-extrabold text-lg mb-2">{s.challenge_title}</h3>
+                  {s.verified && (
+                    <div className="text-xs mb-2" style={{ color: "var(--pf-muted)" }} data-testid={`verifier-${s.id}`}>
+                      Endorsed by <span className="font-semibold" style={{ color: "var(--pf-secondary)" }}>{s.verifier_name}</span> · {s.verifier_title}
+                    </div>
+                  )}
                   {s.submission_link && (
                     <a href={s.submission_link} target="_blank" rel="noreferrer" className="pf-link text-sm inline-flex items-center gap-1.5">
                       <ExternalLink size={14}/> View work
