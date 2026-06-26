@@ -1,17 +1,33 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Target, Trophy, Sparkles, Zap, Brain } from "lucide-react";
+import { ArrowRight, Target, Trophy, Sparkles, Zap, Brain, Calendar, Clock } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import ChallengeCard from "@/components/ChallengeCard";
-import { api } from "@/lib/api";
+import ChallengeCard, { DifficultyBadge } from "@/components/ChallengeCard";
+import { api, daysRemaining } from "@/lib/api";
 
 export default function Landing() {
   const [challenges, setChallenges] = useState([]);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [fading, setFading] = useState(false);
 
   useEffect(() => {
-    api.get("/challenges").then((r) => setChallenges(r.data.slice(0, 3))).catch(() => {});
+    api.get("/challenges").then((r) => setChallenges(r.data)).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (challenges.length <= 1) return;
+    const interval = setInterval(() => {
+      setFading(true);
+      setTimeout(() => {
+        setActiveIdx((i) => (i + 1) % challenges.length);
+        setFading(false);
+      }, 300);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [challenges.length]);
+
+  const hero = challenges[activeIdx];
 
   return (
     <div className="App" data-testid="landing-page">
@@ -46,20 +62,53 @@ export default function Landing() {
               </div>
             </div>
 
-            {/* Visual: sample card + stat tiles */}
+            {/* Visual: rotating live challenge card + stat tiles */}
             <div className="lg:col-span-5 grid grid-cols-2 gap-4 pf-fade-up pf-delay-2">
-              <div className="pf-card p-5 col-span-2">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="pf-tag">Marketing</span>
-                  <span className="pf-badge-intermediate px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Intermediate</span>
-                </div>
-                <div className="text-sm font-semibold mb-1">GrowthLab</div>
-                <h3 className="font-display font-extrabold text-lg leading-snug mb-2">Go-to-Market for D2C Skincare</h3>
-                <p className="text-xs" style={{ color: "var(--pf-muted)" }}>21 days left · 10–14 hrs</p>
+              <div
+                className="pf-card p-5 col-span-2 transition-opacity duration-300"
+                style={{ opacity: fading ? 0 : 1, minHeight: 168 }}
+                data-testid="hero-rotating-card"
+              >
+                {hero ? (
+                  <Link to={`/challenges/${hero.id}`} className="block">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="pf-tag" data-testid="hero-card-category">{hero.category}</span>
+                      <DifficultyBadge difficulty={hero.difficulty} />
+                    </div>
+                    <div className="text-sm font-semibold mb-1" data-testid="hero-card-org">{hero.org}</div>
+                    <h3 className="font-display font-extrabold text-lg leading-snug mb-3 line-clamp-2" data-testid="hero-card-title">
+                      {hero.title}
+                    </h3>
+                    <div className="flex flex-wrap gap-4 text-xs" style={{ color: "var(--pf-muted)" }}>
+                      <span className="inline-flex items-center gap-1.5" data-testid="hero-card-days">
+                        <Calendar size={12}/> {daysRemaining(hero.deadline)} days left
+                      </span>
+                      <span className="inline-flex items-center gap-1.5" data-testid="hero-card-time">
+                        <Clock size={12}/> {hero.est_time}
+                      </span>
+                    </div>
+                    {challenges.length > 1 && (
+                      <div className="flex gap-1.5 mt-4">
+                        {challenges.map((_, i) => (
+                          <span
+                            key={i}
+                            className="h-1 rounded-full transition-all duration-300"
+                            style={{
+                              width: i === activeIdx ? 20 : 6,
+                              background: i === activeIdx ? "var(--pf-primary)" : "var(--pf-card-border)",
+                            }}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </Link>
+                ) : (
+                  <div className="text-sm" style={{ color: "var(--pf-muted)" }}>Loading challenges…</div>
+                )}
               </div>
               <div className="pf-card p-5">
                 <div className="text-xs uppercase tracking-wider font-bold mb-2" style={{ color: "var(--pf-muted)" }}>Active</div>
-                <div className="font-display text-4xl font-extrabold" style={{ color: "var(--pf-primary)" }}>32</div>
+                <div className="font-display text-4xl font-extrabold" style={{ color: "var(--pf-primary)" }}>{challenges.length || 0}</div>
                 <div className="text-sm mt-1">Live challenges</div>
               </div>
               <div className="pf-card p-5">
@@ -110,7 +159,7 @@ export default function Landing() {
             </Link>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {challenges.map((c, i) => (
+            {challenges.slice(0, 3).map((c, i) => (
               <div key={c.id} className={`pf-fade-up pf-delay-${i+1}`}>
                 <ChallengeCard challenge={c} />
               </div>
