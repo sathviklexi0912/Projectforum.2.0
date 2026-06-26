@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Check, X, ExternalLink, LogOut, ShieldCheck, BadgeCheck } from "lucide-react";
+import { Check, X, ExternalLink, LogOut, ShieldCheck, BadgeCheck, Trash2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { api, formatApiError } from "@/lib/api";
 
@@ -169,6 +169,17 @@ export default function Admin() {
     }
   };
 
+  const deleteSubmission = async (s) => {
+    if (!window.confirm(`Permanently delete ${s.student_name}'s submission for "${s.challenge_title}"? This cannot be undone.`)) return;
+    try {
+      await api.delete(`/admin/submissions/${s.id}`);
+      setSubmissions((xs) => xs.filter((x) => x.id !== s.id));
+      toast.success("Submission deleted");
+    } catch (err) {
+      toast.error(formatApiError(err));
+    }
+  };
+
   if (!authed) {
     return (
       <div className="App" data-testid="admin-page-login">
@@ -217,14 +228,14 @@ export default function Admin() {
               <table className="w-full text-sm">
                 <thead style={{ background: "var(--pf-tag-bg)" }}>
                   <tr>
-                    {["Student", "University", "Challenge", "Link", "Date", "Status", "Verify"].map((h) => (
+                    {["Student", "University", "Challenge", "Link", "Date", "Status", "Verify", ""].map((h) => (
                       <th key={h} className="text-left px-5 py-3 font-display font-bold text-xs uppercase tracking-wider" style={{ color: "var(--pf-secondary)" }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {submissions.length === 0 && (
-                    <tr><td colSpan={7} className="text-center py-12 text-sm" style={{ color: "var(--pf-muted)" }}>No submissions yet.</td></tr>
+                    <tr><td colSpan={8} className="text-center py-12 text-sm" style={{ color: "var(--pf-muted)" }}>No submissions yet.</td></tr>
                   )}
                   {submissions.map((s) => {
                     const sc = STATUS_COLORS[s.status] || STATUS_COLORS.Submitted;
@@ -279,6 +290,16 @@ export default function Admin() {
                               <ShieldCheck size={12}/> Verify
                             </button>
                           )}
+                        </td>
+                        <td className="px-5 py-4">
+                          <button
+                            onClick={() => deleteSubmission(s)}
+                            className="inline-flex items-center gap-1 text-xs opacity-60 hover:opacity-100 hover:text-red-600 transition-colors"
+                            data-testid={`admin-delete-sub-${s.id}`}
+                            title="Delete submission"
+                          >
+                            <Trash2 size={14}/>
+                          </button>
                         </td>
                       </tr>
                     );

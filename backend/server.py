@@ -317,6 +317,20 @@ async def unverify_submission(sid: str, _: bool = Depends(require_admin)):
         raise HTTPException(status_code=404, detail="Submission not found")
     return {"ok": True}
 
+@api.delete("/admin/submissions/{sid}")
+async def admin_delete_submission(sid: str, _: bool = Depends(require_admin)):
+    result = await db.submissions.delete_one({"id": sid})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Submission not found")
+    return {"ok": True}
+
+@api.delete("/submissions/{sid}")
+async def delete_my_submission(sid: str, user: dict = Depends(get_current_user)):
+    result = await db.submissions.delete_one({"id": sid, "student_id": user["id"]})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Submission not found")
+    return {"ok": True}
+
 # ---------- Projects ----------
 @api.post("/projects")
 async def create_project(body: ProjectIn, user: dict = Depends(get_current_user)):

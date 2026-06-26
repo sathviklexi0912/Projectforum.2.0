@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { LayoutDashboard, Grid3x3, FileText, Briefcase, User, Plus, X, ExternalLink, Linkedin, Copy } from "lucide-react";
+import { LayoutDashboard, Grid3x3, FileText, Briefcase, User, Plus, X, ExternalLink, Linkedin, Copy, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import ChallengeCard from "@/components/ChallengeCard";
@@ -128,7 +128,7 @@ function ChallengesTab({ challenges, filter, setFilter }) {
   );
 }
 
-function SubmissionsTab({ submissions }) {
+function SubmissionsTab({ submissions, onDelete }) {
   return (
     <div data-testid="submissions-tab">
       <h1 className="font-display text-4xl font-extrabold tracking-tighter mb-6">My submissions</h1>
@@ -143,7 +143,7 @@ function SubmissionsTab({ submissions }) {
             <table className="w-full text-sm">
               <thead style={{ background: "var(--pf-tag-bg)" }}>
                 <tr>
-                  {["Challenge", "Company", "Date", "Status", "Link"].map((h) => (
+                  {["Challenge", "Company", "Date", "Status", "Link", ""].map((h) => (
                     <th key={h} className="text-left px-5 py-3 font-display font-bold text-xs uppercase tracking-wider" style={{ color: "var(--pf-secondary)" }}>{h}</th>
                   ))}
                 </tr>
@@ -164,6 +164,16 @@ function SubmissionsTab({ submissions }) {
                         <a href={s.submission_link} target="_blank" rel="noreferrer" className="pf-link text-xs inline-flex items-center gap-1">
                           <ExternalLink size={12}/> View
                         </a>
+                      </td>
+                      <td className="px-5 py-4">
+                        <button
+                          onClick={() => onDelete(s)}
+                          className="inline-flex items-center gap-1 text-xs opacity-60 hover:opacity-100 hover:text-red-600 transition-colors"
+                          data-testid={`delete-submission-${s.id}`}
+                          title="Delete submission"
+                        >
+                          <Trash2 size={14}/>
+                        </button>
                       </td>
                     </tr>
                   );
@@ -471,6 +481,17 @@ export default function Dashboard() {
     }
   };
 
+  const deleteSubmission = async (s) => {
+    if (!window.confirm(`Permanently delete your submission for "${s.challenge_title}"? This cannot be undone.`)) return;
+    try {
+      await api.delete(`/submissions/${s.id}`);
+      setSubmissions((xs) => xs.filter((x) => x.id !== s.id));
+      toast.success("Submission deleted");
+    } catch (err) {
+      toast.error(formatApiError(err));
+    }
+  };
+
   if (!user) return null;
 
   return (
@@ -481,7 +502,7 @@ export default function Dashboard() {
         <main className="flex-1 lg:ml-60 px-6 lg:px-10 py-10">
           {active === "overview" && <OverviewTab user={user} submissions={submissions} recommended={challenges} navigate={navTo} />}
           {active === "challenges" && <ChallengesTab challenges={challenges} filter={filter} setFilter={setFilter} />}
-          {active === "submissions" && <SubmissionsTab submissions={submissions} />}
+          {active === "submissions" && <SubmissionsTab submissions={submissions} onDelete={deleteSubmission} />}
           {active === "projects" && <ProjectsTab projects={projects} onAdd={addProject} onDelete={deleteProject} />}
           {active === "profile" && <ProfileTab user={user} updateUser={updateUser} submissions={submissions} projects={projects} />}
         </main>
