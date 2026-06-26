@@ -271,6 +271,22 @@ async def create_submission(body: SubmissionIn, user: dict = Depends(get_current
     }
     await db.submissions.insert_one(sub)
     sub.pop("_id", None)
+
+    # Auto-create a portfolio project for this submission
+    today = datetime.now(timezone.utc)
+    project = {
+        "id": str(uuid.uuid4()),
+        "student_id": user["id"],
+        "title": challenge.get("title", ""),
+        "description": body.explanation,
+        "link": body.submission_link,
+        "category": challenge.get("category", "Other"),
+        "date_completed": today.strftime("%Y-%m"),
+        "source_submission_id": sub["id"],
+        "created_at": now_iso(),
+    }
+    await db.projects.insert_one(project)
+
     return sub
 
 @api.get("/submissions/mine")
