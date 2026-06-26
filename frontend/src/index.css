@@ -2,114 +2,209 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-    margin: 0;
-    font-family:
-        -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-        "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-        sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+:root {
+  --pf-bg: #F5F4FF;
+  --pf-text: #1A1A2E;
+  --pf-primary: #D85A30;
+  --pf-primary-hover: #993C1D;
+  --pf-secondary: #534AB7;
+  --pf-card-bg: #FFFFFF;
+  --pf-card-border: #CECBF6;
+  --pf-muted: #6B6480;
+  --pf-tag-bg: #EEEDFE;
+  --pf-tag-text: #534AB7;
 }
 
-code {
-    font-family:
-        source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+.dark {
+  --pf-bg: #0D0B1A;
+  --pf-text: #F0EFF9;
+  --pf-primary: #F07050;
+  --pf-primary-hover: #D85A30;
+  --pf-secondary: #7B74E0;
+  --pf-card-bg: #1A1824;
+  --pf-card-border: #2A2640;
+  --pf-muted: #A39EB6;
+  --pf-tag-bg: #1E1A3D;
+  --pf-tag-text: #B7B1F4;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--pf-bg);
+  color: var(--pf-text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+h1, h2, h3, h4, h5, h6, .font-display {
+  font-family: 'Syne', 'Inter', sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background: var(--pf-primary);
+  color: #fff;
+}
+
+/* shadcn token overrides (kept for shadcn components we use) */
+@layer base {
+  :root {
+    --background: 248 100% 98%;
+    --foreground: 240 23% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 23% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 23% 14%;
+    --primary: 14 71% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 245 41% 51%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 245 60% 96%;
+    --muted-foreground: 245 10% 45%;
+    --accent: 245 60% 96%;
+    --accent-foreground: 245 41% 51%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 245 65% 88%;
+    --input: 245 65% 88%;
+    --ring: 14 71% 52%;
+    --radius: 0.75rem;
+  }
+  .dark {
+    --background: 248 36% 7%;
+    --foreground: 245 60% 96%;
+    --card: 245 22% 12%;
+    --card-foreground: 245 60% 96%;
+    --popover: 245 22% 12%;
+    --popover-foreground: 245 60% 96%;
+    --primary: 14 86% 63%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 245 60% 67%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 245 22% 18%;
+    --muted-foreground: 245 20% 70%;
+    --accent: 245 22% 18%;
+    --accent-foreground: 245 60% 96%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 245 22% 20%;
+    --input: 245 22% 20%;
+    --ring: 14 86% 63%;
+  }
 }
 
 @layer base {
-    :root {
-        --background: 0 0% 100%;
-        --foreground: 0 0% 3.9%;
-        --card: 0 0% 100%;
-        --card-foreground: 0 0% 3.9%;
-        --popover: 0 0% 100%;
-        --popover-foreground: 0 0% 3.9%;
-        --primary: 0 0% 9%;
-        --primary-foreground: 0 0% 98%;
-        --secondary: 0 0% 96.1%;
-        --secondary-foreground: 0 0% 9%;
-        --muted: 0 0% 96.1%;
-        --muted-foreground: 0 0% 45.1%;
-        --accent: 0 0% 96.1%;
-        --accent-foreground: 0 0% 9%;
-        --destructive: 0 84.2% 60.2%;
-        --destructive-foreground: 0 0% 98%;
-        --border: 0 0% 89.8%;
-        --input: 0 0% 89.8%;
-        --ring: 0 0% 3.9%;
-        --chart-1: 12 76% 61%;
-        --chart-2: 173 58% 39%;
-        --chart-3: 197 37% 24%;
-        --chart-4: 43 74% 66%;
-        --chart-5: 27 87% 67%;
-        --radius: 0.5rem;
-    }
-    .dark {
-        --background: 0 0% 3.9%;
-        --foreground: 0 0% 98%;
-        --card: 0 0% 3.9%;
-        --card-foreground: 0 0% 98%;
-        --popover: 0 0% 3.9%;
-        --popover-foreground: 0 0% 98%;
-        --primary: 0 0% 98%;
-        --primary-foreground: 0 0% 9%;
-        --secondary: 0 0% 14.9%;
-        --secondary-foreground: 0 0% 98%;
-        --muted: 0 0% 14.9%;
-        --muted-foreground: 0 0% 63.9%;
-        --accent: 0 0% 14.9%;
-        --accent-foreground: 0 0% 98%;
-        --destructive: 0 62.8% 30.6%;
-        --destructive-foreground: 0 0% 98%;
-        --border: 0 0% 14.9%;
-        --input: 0 0% 14.9%;
-        --ring: 0 0% 83.1%;
-        --chart-1: 220 70% 50%;
-        --chart-2: 160 60% 45%;
-        --chart-3: 30 80% 55%;
-        --chart-4: 280 65% 60%;
-        --chart-5: 340 75% 55%;
-    }
+  * { border-color: hsl(var(--border)); }
+  body { background-color: var(--pf-bg); color: var(--pf-text); }
 }
 
-@layer base {
-    * {
-        @apply border-border;
-    }
-    body {
-        @apply bg-background text-foreground;
-    }
+/* Utility helpers */
+.pf-card {
+  background-color: var(--pf-card-bg);
+  border: 1px solid var(--pf-card-border);
+  border-radius: 16px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.pf-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--pf-secondary);
 }
 
-@layer base {
-    [data-debug-wrapper="true"] {
-        display: contents !important;
-    }
+.pf-btn-primary {
+  background-color: var(--pf-primary);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+.pf-btn-primary:hover { background-color: var(--pf-primary-hover); }
+.pf-btn-primary:active { transform: scale(0.98); }
 
-    [data-debug-wrapper="true"] > * {
-        margin-left: inherit;
-        margin-right: inherit;
-        margin-top: inherit;
-        margin-bottom: inherit;
-        padding-left: inherit;
-        padding-right: inherit;
-        padding-top: inherit;
-        padding-bottom: inherit;
-        column-gap: inherit;
-        row-gap: inherit;
-        gap: inherit;
-        border-left-width: inherit;
-        border-right-width: inherit;
-        border-top-width: inherit;
-        border-bottom-width: inherit;
-        border-left-style: inherit;
-        border-right-style: inherit;
-        border-top-style: inherit;
-        border-bottom-style: inherit;
-        border-left-color: inherit;
-        border-right-color: inherit;
-        border-top-color: inherit;
-        border-bottom-color: inherit;
-    }
+.pf-btn-secondary {
+  background-color: transparent;
+  border: 1.5px solid var(--pf-secondary);
+  color: var(--pf-secondary);
+  font-weight: 600;
+  padding: 0.7rem 1.4rem;
+  border-radius: 9999px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+.pf-btn-secondary:hover { background-color: var(--pf-secondary); color: #fff; }
+
+.pf-input {
+  width: 100%;
+  background-color: var(--pf-card-bg);
+  border: 1px solid var(--pf-card-border);
+  color: var(--pf-text);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.pf-input:focus {
+  border-color: var(--pf-primary);
+  box-shadow: 0 0 0 3px rgba(216, 90, 48, 0.15);
+}
+
+.pf-badge-beginner { background:#EEEDFE; color:#3C3489; }
+.dark .pf-badge-beginner { background:#1E1A3D; color:#CECBF6; }
+.pf-badge-intermediate { background:#FAECE7; color:#712B13; }
+.dark .pf-badge-intermediate { background:#3D1A10; color:#FAECE7; }
+.pf-badge-advanced { background:#D85A30; color:#fff; }
+.dark .pf-badge-advanced { background:#F07050; color:#fff; }
+
+.pf-tag {
+  background: var(--pf-tag-bg);
+  color: var(--pf-tag-text);
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.pf-link {
+  color: var(--pf-secondary);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.pf-link:hover { color: var(--pf-primary); text-decoration: underline; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--pf-card-border); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--pf-secondary); }
+
+/* Animation */
+@keyframes pf-fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.pf-fade-up { animation: pf-fade-up 0.5s ease forwards; }
+.pf-delay-1 { animation-delay: 0.05s; opacity: 0; }
+.pf-delay-2 { animation-delay: 0.12s; opacity: 0; }
+.pf-delay-3 { animation-delay: 0.18s; opacity: 0; }
+.pf-delay-4 { animation-delay: 0.24s; opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
 }

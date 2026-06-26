@@ -1,55 +1,55 @@
-import { useEffect } from "react";
 import "@/App.css";
+import "@/index.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
-import { HOME } from "@/constants/testIds";
-
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
-
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
-
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
-
-  return (
-    <div>
-      <header className="App-header">
-        <a
-          data-testid={HOME.emergentLink}
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
+import { Toaster } from "sonner";
+import { AuthProvider } from "@/context/AuthContext";
+import { ThemeProvider } from "@/context/ThemeContext";
+import Landing from "@/pages/Landing";
+import SignUp from "@/pages/SignUp";
+import Login from "@/pages/Login";
+import PasswordReset from "@/pages/PasswordReset";
+import BrowseChallenges from "@/pages/BrowseChallenges";
+import ChallengeDetail from "@/pages/ChallengeDetail";
+import SubmitChallenge from "@/pages/SubmitChallenge";
+import SubmissionForm from "@/pages/SubmissionForm";
+import ThankYou from "@/pages/ThankYou";
+import Dashboard from "@/pages/Dashboard";
+import PublicProfile from "@/pages/PublicProfile";
+import Admin from "@/pages/Admin";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 function App() {
   return (
-    <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </div>
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Toaster richColors position="top-right" />
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/reset-password" element={<PasswordReset />} />
+            <Route path="/challenges" element={<BrowseChallenges />} />
+            <Route path="/challenges/:id" element={<ChallengeDetail />} />
+            <Route path="/submit-challenge" element={<SubmitChallenge />} />
+            <Route path="/profile/:studentId" element={<PublicProfile />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/submit/:challengeId" element={
+              <ProtectedRoute><SubmissionForm /></ProtectedRoute>
+            } />
+            <Route path="/thank-you" element={
+              <ProtectedRoute><ThankYou /></ProtectedRoute>
+            } />
+            <Route path="/dashboard" element={
+              <ProtectedRoute><Dashboard /></ProtectedRoute>
+            } />
+            <Route path="/dashboard/:tab" element={
+              <ProtectedRoute><Dashboard /></ProtectedRoute>
+            } />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
