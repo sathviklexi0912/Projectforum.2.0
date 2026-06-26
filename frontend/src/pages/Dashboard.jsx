@@ -313,7 +313,7 @@ function ProfileTab({ user, updateUser, submissions, projects }) {
     }
   };
 
-  const completedSubs = submissions.filter((s) => s.status === "Shortlisted" || s.verified);
+  const completedSubs = submissions;
 
   const copyProfileLink = () => {
     const url = `${window.location.origin}/profile/${user.id}`;
