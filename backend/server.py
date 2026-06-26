@@ -61,6 +61,9 @@ def serialize_user(user: dict) -> dict:
         "year": user.get("year", ""),
         "linkedin": user.get("linkedin", ""),
         "skills": user.get("skills", []),
+        "bio": user.get("bio", ""),
+        "location": user.get("location", ""),
+        "headline": user.get("headline", ""),
         "created_at": user.get("created_at", ""),
     }
 
@@ -98,6 +101,9 @@ class RegisterIn(BaseModel):
     year: str = ""
     linkedin: str = ""
     skills: List[str] = []
+    bio: str = ""
+    location: str = ""
+    headline: str = ""
 
 class LoginIn(BaseModel):
     email: EmailStr
@@ -114,6 +120,9 @@ class UpdateProfileIn(BaseModel):
     year: Optional[str] = None
     linkedin: Optional[str] = None
     skills: Optional[List[str]] = None
+    bio: Optional[str] = None
+    location: Optional[str] = None
+    headline: Optional[str] = None
 
 class ChallengeIn(BaseModel):
     title: str
@@ -190,6 +199,9 @@ async def register(body: RegisterIn):
         "year": body.year,
         "linkedin": body.linkedin,
         "skills": body.skills,
+        "bio": body.bio,
+        "location": body.location,
+        "headline": body.headline,
         "created_at": now_iso(),
     }
     await db.users.insert_one(doc)

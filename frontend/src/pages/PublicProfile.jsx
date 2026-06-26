@@ -30,9 +30,19 @@ export default function PublicProfile() {
             </div>
             <div className="flex-1 min-w-[200px]">
               <h1 className="font-display text-4xl font-extrabold tracking-tighter mb-1">{u.name}</h1>
-              {u.university && (
-                <div className="text-sm inline-flex items-center gap-1.5" style={{ color: "var(--pf-muted)" }}>
-                  <GraduationCap size={14}/> {u.university}{u.degree ? ` · ${u.degree}` : ""}{u.year ? ` · ${u.year} year` : ""}
+              {u.headline && (
+                <div className="text-base font-semibold mb-2" style={{ color: "var(--pf-secondary)" }} data-testid="public-headline">
+                  {u.headline}
+                </div>
+              )}
+              {(u.university || u.location) && (
+                <div className="text-sm inline-flex items-center gap-1.5 flex-wrap" style={{ color: "var(--pf-muted)" }}>
+                  <GraduationCap size={14}/>
+                  {u.university && <span>{u.university}</span>}
+                  {u.university && u.location && <span>·</span>}
+                  {u.location && <span data-testid="public-location">{u.location}</span>}
+                  {u.degree && <span>· {u.degree}</span>}
+                  {u.year && <span>· {u.year} year</span>}
                 </div>
               )}
               {u.linkedin && (
@@ -42,8 +52,17 @@ export default function PublicProfile() {
               )}
             </div>
           </div>
+          {u.bio && (
+            <p
+              className="mt-5 text-base leading-relaxed max-w-3xl"
+              style={{ color: "var(--pf-text)" }}
+              data-testid="public-bio"
+            >
+              {u.bio}
+            </p>
+          )}
           {u.skills?.length > 0 && (
-            <div className="mt-6 flex flex-wrap gap-2" data-testid="profile-skills">
+            <div className="mt-5 flex flex-wrap gap-2" data-testid="profile-skills">
               {u.skills.map((s) => <span key={s} className="pf-tag">{s}</span>)}
             </div>
           )}

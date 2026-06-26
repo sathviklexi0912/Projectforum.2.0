@@ -16,6 +16,7 @@ import ThankYou from "@/pages/ThankYou";
 import Dashboard from "@/pages/Dashboard";
 import PublicProfile from "@/pages/PublicProfile";
 import Admin from "@/pages/Admin";
+import EditProfile from "@/pages/EditProfile";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 function App() {
@@ -45,6 +46,9 @@ function App() {
             } />
             <Route path="/dashboard" element={
               <ProtectedRoute><Dashboard /></ProtectedRoute>
+            } />
+            <Route path="/dashboard/profile/edit" element={
+              <ProtectedRoute><EditProfile /></ProtectedRoute>
             } />
             <Route path="/dashboard/:tab" element={
               <ProtectedRoute><Dashboard /></ProtectedRoute>

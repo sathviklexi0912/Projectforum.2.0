@@ -386,34 +386,13 @@ function ProjectsTab({ projects, onAdd, onUpdate, onDelete }) {
   );
 }
 
-function ProfileTab({ user, updateUser, submissions, projects }) {
-  const [form, setForm] = useState({
-    name: user.name || "", university: user.university || "", degree: user.degree || "",
-    year: user.year || "", linkedin: user.linkedin || "", skills: user.skills || [],
-  });
-  const [saving, setSaving] = useState(false);
-  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
-  const toggleSkill = (s) => set("skills", form.skills.includes(s) ? form.skills.filter(x => x !== s) : [...form.skills, s]);
-
-  const profileFields = ["name", "email", "university", "degree", "year", "linkedin", "skills"];
+function ProfileTab({ user, submissions, projects, navigate }) {
+  const profileFields = ["name", "email", "university", "degree", "year", "linkedin", "skills", "bio", "location", "headline"];
   const filled = profileFields.filter((k) => {
-    const v = k === "email" ? user.email : form[k];
+    const v = user[k];
     return Array.isArray(v) ? v.length > 0 : !!v;
   }).length;
   const pct = Math.round((filled / profileFields.length) * 100);
-
-  const save = async () => {
-    setSaving(true);
-    try {
-      const { data } = await api.patch("/auth/me", form);
-      updateUser(data);
-      toast.success("Profile updated");
-    } catch (err) {
-      toast.error(formatApiError(err));
-    } finally {
-      setSaving(false);
-    }
-  };
 
   const completedSubs = submissions;
 
@@ -425,26 +404,61 @@ function ProfileTab({ user, updateUser, submissions, projects }) {
 
   return (
     <div className="space-y-8" data-testid="profile-tab">
-      <div>
-        <h1 className="font-display text-4xl font-extrabold tracking-tighter mb-2">My profile</h1>
-        <button onClick={copyProfileLink} className="pf-link text-sm inline-flex items-center gap-1.5" data-testid="copy-public-link">
-          <Copy size={14}/> Copy public profile link
+      <div className="flex justify-between items-start flex-wrap gap-3">
+        <div>
+          <h1 className="font-display text-4xl font-extrabold tracking-tighter mb-2">My profile</h1>
+          <button onClick={copyProfileLink} className="pf-link text-sm inline-flex items-center gap-1.5" data-testid="copy-public-link">
+            <Copy size={14}/> Copy public profile link
+          </button>
+        </div>
+        <button
+          onClick={() => navigate("/dashboard/profile/edit")}
+          className="pf-btn-primary"
+          data-testid="edit-profile-btn"
+        >
+          <Pencil size={14}/> Edit profile
         </button>
       </div>
 
       <div className="pf-card p-7">
-        <div className="flex items-center gap-5 mb-6">
+        <div className="flex items-center gap-5 mb-5">
           <div className="w-16 h-16 rounded-2xl flex items-center justify-center font-display font-extrabold text-xl text-white"
             style={{ background: "linear-gradient(135deg, var(--pf-secondary), var(--pf-primary))" }}>
-            {initialsFromName(form.name || user.email)}
+            {initialsFromName(user.name || user.email)}
           </div>
-          <div>
-            <div className="font-display text-2xl font-extrabold">{form.name || "Unnamed"}</div>
-            <div className="text-sm" style={{ color: "var(--pf-muted)" }}>{user.email}</div>
+          <div className="flex-1 min-w-0">
+            <div className="font-display text-2xl font-extrabold">{user.name || "Unnamed"}</div>
+            {user.headline && (
+              <div className="text-sm font-semibold mt-0.5" style={{ color: "var(--pf-secondary)" }} data-testid="profile-headline-display">{user.headline}</div>
+            )}
+            <div className="text-xs mt-1" style={{ color: "var(--pf-muted)" }}>{user.email}</div>
           </div>
         </div>
 
-        <div className="mb-6">
+        {user.bio && (
+          <p className="text-sm leading-relaxed mb-5" data-testid="profile-bio-display" style={{ color: "var(--pf-muted)" }}>{user.bio}</p>
+        )}
+
+        <div className="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm mb-5">
+          {user.university && <div><span className="font-semibold">University:</span> <span style={{ color: "var(--pf-muted)" }}>{user.university}</span></div>}
+          {user.location && <div data-testid="profile-location-display"><span className="font-semibold">Location:</span> <span style={{ color: "var(--pf-muted)" }}>{user.location}</span></div>}
+          {user.degree && <div><span className="font-semibold">Degree:</span> <span style={{ color: "var(--pf-muted)" }}>{user.degree}</span></div>}
+          {user.year && <div><span className="font-semibold">Year:</span> <span style={{ color: "var(--pf-muted)" }}>{user.year}</span></div>}
+          {user.linkedin && (
+            <div className="sm:col-span-2">
+              <span className="font-semibold">LinkedIn:</span>{" "}
+              <a href={user.linkedin} target="_blank" rel="noreferrer" className="pf-link inline-flex items-center gap-1"><Linkedin size={12}/> {user.linkedin}</a>
+            </div>
+          )}
+        </div>
+
+        {user.skills?.length > 0 && (
+          <div className="mb-6 flex flex-wrap gap-2">
+            {user.skills.map((s) => <span key={s} className="pf-tag" data-testid={`profile-skill-tag-${s.toLowerCase()}`}>{s}</span>)}
+          </div>
+        )}
+
+        <div>
           <div className="flex justify-between text-sm mb-2">
             <span className="font-medium">Profile completion</span>
             <span className="font-bold" style={{ color: "var(--pf-primary)" }}>{pct}%</span>
@@ -453,55 +467,6 @@ function ProfileTab({ user, updateUser, submissions, projects }) {
             <div className="h-2 rounded-full transition-all" style={{ width: `${pct}%`, background: "var(--pf-primary)" }} data-testid="profile-progress"/>
           </div>
         </div>
-
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm font-medium block mb-1.5">Name</label>
-            <input className="pf-input" value={form.name} onChange={(e) => set("name", e.target.value)} data-testid="profile-name"/>
-          </div>
-          <div>
-            <label className="text-sm font-medium block mb-1.5">University</label>
-            <input className="pf-input" value={form.university} onChange={(e) => set("university", e.target.value)} data-testid="profile-university"/>
-          </div>
-          <div>
-            <label className="text-sm font-medium block mb-1.5">Degree</label>
-            <input className="pf-input" value={form.degree} onChange={(e) => set("degree", e.target.value)} data-testid="profile-degree"/>
-          </div>
-          <div>
-            <label className="text-sm font-medium block mb-1.5">Year</label>
-            <select className="pf-input" value={form.year} onChange={(e) => set("year", e.target.value)} data-testid="profile-year">
-              <option value="">Select</option>
-              {YEARS.map((y) => <option key={y}>{y}</option>)}
-            </select>
-          </div>
-          <div className="sm:col-span-2">
-            <label className="text-sm font-medium block mb-1.5">LinkedIn</label>
-            <input className="pf-input" value={form.linkedin} onChange={(e) => set("linkedin", e.target.value)} data-testid="profile-linkedin"/>
-          </div>
-        </div>
-
-        <div className="mt-5">
-          <label className="text-sm font-medium block mb-2">Skills</label>
-          <div className="flex flex-wrap gap-2">
-            {SKILLS.map((s) => {
-              const active = form.skills.includes(s);
-              return (
-                <button key={s} onClick={() => toggleSkill(s)} type="button"
-                  className="px-3.5 py-1.5 rounded-full text-sm font-medium transition-all"
-                  data-testid={`profile-skill-${s.toLowerCase()}`}
-                  style={active
-                    ? { background: "var(--pf-primary)", color: "#fff", border: "1px solid var(--pf-primary)" }
-                    : { background: "transparent", color: "var(--pf-text)", border: "1px solid var(--pf-card-border)" }}>
-                  {s}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <button onClick={save} disabled={saving} className="pf-btn-primary mt-7" data-testid="save-profile">
-          {saving ? "Saving…" : "Save profile"}
-        </button>
       </div>
 
       <section>
@@ -617,7 +582,7 @@ export default function Dashboard() {
           {active === "challenges" && <ChallengesTab challenges={challenges} filter={filter} setFilter={setFilter} />}
           {active === "submissions" && <SubmissionsTab submissions={submissions} onDelete={deleteSubmission} challengesById={Object.fromEntries(challenges.map(c => [c.id, c]))} navigate={navigate} />}
           {active === "projects" && <ProjectsTab projects={projects} onAdd={addProject} onUpdate={updateProject} onDelete={deleteProject} />}
-          {active === "profile" && <ProfileTab user={user} updateUser={updateUser} submissions={submissions} projects={projects} />}
+          {active === "profile" && <ProfileTab user={user} submissions={submissions} projects={projects} navigate={navigate} />}
         </main>
       </div>
     </div>
