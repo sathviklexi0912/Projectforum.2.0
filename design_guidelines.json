@@ -1,0 +1,157 @@
+{
+  "theme": {
+    "default": "light",
+    "archetype": "3 (Pastel & Soft) mixed with User Energetic Palette",
+    "feel": "energetic, student-friendly, consumer app, bold typography, clean whitespace"
+  },
+  "colors": {
+    "light": {
+      "background": "#F5F4FF",
+      "text": "#1A1A2E",
+      "primary": "#D85A30",
+      "primary_hover": "#993C1D",
+      "secondary": "#534AB7",
+      "card_bg": "#FFFFFF",
+      "card_border": "#CECBF6",
+      "beginner_bg": "#EEEDFE",
+      "beginner_text": "#3C3489",
+      "intermediate_bg": "#FAECE7",
+      "intermediate_text": "#712B13",
+      "advanced_bg": "#D85A30",
+      "advanced_text": "#FFFFFF",
+      "category_tag_bg": "#EEEDFE",
+      "category_tag_text": "#534AB7"
+    },
+    "dark": {
+      "background": "#0D0B1A",
+      "text": "#F0EFF9",
+      "primary": "#F07050",
+      "primary_hover": "#D85A30",
+      "secondary": "#7B74E0",
+      "card_bg": "#1A1824",
+      "card_border": "#2A2640",
+      "beginner_bg": "#1E1A3D",
+      "beginner_text": "#CECBF6",
+      "intermediate_bg": "#3D1A10",
+      "intermediate_text": "#FAECE7",
+      "advanced_bg": "#F07050",
+      "advanced_text": "#FFFFFF",
+      "category_tag_bg": "#1E1A3D",
+      "category_tag_text": "#7B74E0"
+    }
+  },
+  "typography": {
+    "fonts": {
+      "headings": "'Syne', sans-serif",
+      "body": "'Inter', sans-serif"
+    },
+    "scales": {
+      "h1": "text-5xl sm:text-6xl font-[800] tracking-tighter leading-tight",
+      "h2": "text-3xl sm:text-4xl font-[700] tracking-tight leading-snug",
+      "h3": "text-xl sm:text-2xl font-[700] tracking-tight",
+      "h4": "text-lg sm:text-xl font-[700]",
+      "body": "text-base font-normal leading-relaxed tracking-normal",
+      "small": "text-sm font-medium"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-[#D85A30] text-white hover:bg-[#993C1D] dark:bg-[#F07050] dark:hover:bg-[#D85A30] font-medium px-6 py-3 rounded-full transition-colors",
+      "secondary": "bg-transparent border border-[#534AB7] text-[#534AB7] dark:border-[#7B74E0] dark:text-[#7B74E0] hover:bg-[#534AB7]/10 font-medium px-6 py-3 rounded-full transition-colors"
+    },
+    "cards": {
+      "base": "bg-white dark:bg-[#1A1824] border border-[#CECBF6] dark:border-[#2A2640] rounded-[16px] p-6 lg:p-8 shadow-none transition-transform hover:-translate-y-1"
+    },
+    "badges": {
+      "beginner": "bg-[#EEEDFE] text-[#3C3489] dark:bg-[#1E1A3D] dark:text-[#CECBF6] px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider",
+      "intermediate": "bg-[#FAECE7] text-[#712B13] dark:bg-[#3D1A10] dark:text-[#FAECE7] px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider",
+      "advanced": "bg-[#D85A30] text-white dark:bg-[#F07050] px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider",
+      "category": "bg-[#EEEDFE] text-[#534AB7] dark:bg-[#1E1A3D] dark:text-[#7B74E0] px-3 py-1 rounded-full text-sm font-medium"
+    },
+    "inputs": {
+      "base": "bg-white dark:bg-[#1A1824] border border-[#CECBF6] dark:border-[#2A2640] text-[#1A1A2E] dark:text-[#F0EFF9] rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#D85A30] focus:border-transparent outline-none transition-all w-full"
+    },
+    "navbar": {
+      "base": "sticky top-0 z-50 backdrop-blur-xl bg-[#F5F4FF]/80 dark:bg-[#0D0B1A]/80 border-b border-[#CECBF6] dark:border-[#2A2640] px-6 py-4"
+    },
+    "sidebar": {
+      "base": "w-64 bg-[#F5F4FF] dark:bg-[#0D0B1A] border-r border-[#CECBF6] dark:border-[#2A2640] h-screen fixed left-0 top-0 pt-20 px-6 hidden md:block"
+    }
+  },
+  "layout": {
+    "spacing": {
+      "section_y": "py-20 sm:py-32",
+      "container_px": "px-6 sm:px-12 lg:px-24",
+      "gap_grid": "gap-8 lg:gap-12",
+      "gap_bento": "gap-4 sm:gap-6"
+    },
+    "patterns": {
+      "hero": "Asymmetric bento grid or wide split layout for landing page. Use big Syne headings.",
+      "dashboard": "Fixed left sidebar on desktop (width 64), bottom tab bar or hamburger menu on mobile. Main content has left margin on desktop to accommodate sidebar.",
+      "challenge_grid": "3-column responsive grid (grid-cols-1 md:grid-cols-2 lg:grid-cols-3) with gap-8. Cards stretch to full height.",
+      "portfolio": "Bento grid (Tetris grid) style. Mix 2x2, 2x1, 1x2 spanning elements to create tension and visual interest."
+    }
+  },
+  "motion": {
+    "hover": "Subtle transform translate-y-[-4px] on cards. Button background transitions 0.2s ease.",
+    "page_transition": "Simple opacity fade for page mounts.",
+    "accessibility": "Respect prefers-reduced-motion media query for all scale/translate animations."
+  },
+  "testing": {
+    "attributes": "All interactive elements MUST use data-testid attributes (e.g., data-testid='submit-challenge-button', data-testid='login-form')."
+  },
+  "media": {
+    "images": [
+      {
+        "category": "hero",
+        "url": "https://images.unsplash.com/photo-1758270705290-62b6294dd044?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzl8MHwxfHNlYXJjaHwzfHxzdHVkZW50cyUyMHdvcmtpbmclMjBsYXB0b3B8ZW58MHx8fHwxNzgyNTA1NzY4fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Diverse group of students gathered around laptop"
+      },
+      {
+        "category": "hero_alternative",
+        "url": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzl8MHwxfHNlYXJjaHwyfHxzdHVkZW50cyUyMHdvcmtpbmclMjBsYXB0b3B8ZW58MHx8fHwxNzgyNTA1NzY4fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Students collaborating at a table"
+      },
+      {
+        "category": "challenge_thumbnail_tech",
+        "url": "https://images.unsplash.com/photo-1644088379091-d574269d422f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxNzV8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGJ1c2luZXNzJTIwdGVjaHxlbnwwfHx8fDE3ODI1MDU3Njh8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Abstract tech nodes"
+      },
+      {
+        "category": "challenge_thumbnail_business",
+        "url": "https://images.unsplash.com/photo-1643228995868-bf698f67d053?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxNzV8MHwxfHNlYXJjaHwzfHxhYnN0cmFjdCUyMGJ1c2luZXNzJTIwdGVjaHxlbnwwfHx8fDE3ODI1MDU3Njh8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Abstract business cubes"
+      },
+      {
+        "category": "company_logo_1",
+        "url": "https://images.pexels.com/photos/31461307/pexels-photo-31461307.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Modern company logo building"
+      },
+      {
+        "category": "company_logo_2",
+        "url": "https://images.unsplash.com/photo-1780666040997-935b0212fa14?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNTl8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBjb21wYW55JTIwbG9nb3xlbnwwfHx8fDE3ODI1MDU3Njh8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Modern company logo sign"
+      },
+      {
+        "category": "student_avatar_1",
+        "url": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODd8MHwxfHNlYXJjaHwzfHxzdHVkZW50JTIwcG9ydHJhaXR8ZW58MHx8fHwxNzgyNTA1NzczfDA&ixlib=rb-4.1.0&q=85",
+        "description": "Student avatar portrait"
+      },
+      {
+        "category": "student_avatar_2",
+        "url": "https://images.unsplash.com/photo-1544717305-2782549b5136?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODd8MHwxfHNlYXJjaHwyfHxzdHVkZW50JTIwcG9ydHJhaXR8ZW58MHx8fHwxNzgyNTA1NzczfDA&ixlib=rb-4.1.0&q=85",
+        "description": "Student avatar holding folder"
+      }
+    ]
+  },
+  "instructions_to_main_agent": [
+    "Install Google Fonts Syne and Inter in the primary HTML template.",
+    "Implement light and dark mode toggling using Tailwind 'dark' class applied to HTML root.",
+    "Do NOT use heavy box-shadows for cards; strictly adhere to the defined 1px borders.",
+    "All headers MUST use the Syne font-family (700-800 weight with tight tracking); body must use Inter.",
+    "For marketing pages (landing), utilize pure HTML/Tailwind for maximum layout flexibility (bento grids, overlaps).",
+    "For dashboards and forms, heavily customize Shadcn components to match these specs (strip Vercel-look, adjust radii and borders).",
+    "All interactive elements (buttons, inputs, links) MUST include data-testid attributes for testing.",
+    "Ensure hover states use the designated hover colors and maintain WCAG contrast."
+  ]
+}
