@@ -55,17 +55,20 @@ export default function Admin() {
   const [tab, setTab] = useState("submissions");
   const [submissions, setSubmissions] = useState([]);
   const [pending, setPending] = useState([]);
+  const [challenges, setChallenges] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const load = async () => {
     setLoading(true);
     try {
-      const [s, p] = await Promise.all([
+      const [s, p, c] = await Promise.all([
         api.get("/admin/submissions"),
         api.get("/admin/pending-challenges"),
+        api.get("/challenges"),
       ]);
       setSubmissions(s.data);
       setPending(p.data);
+      setChallenges(c.data);
       setAuthed(true);
     } catch (err) {
       if (err?.response?.status === 401) {
@@ -86,6 +89,7 @@ export default function Admin() {
     setAuthed(false);
     setSubmissions([]);
     setPending([]);
+    setChallenges([]);
   };
 
   const updateStatus = async (sid, status) => {
@@ -100,19 +104,38 @@ export default function Admin() {
 
   const approve = async (pid) => {
     try {
-      await api.post(`/admin/pending-challenges/${pid}/approve`);
+      const { data } = await api.post(`/admin/pending-challenges/${pid}/approve`);
       setPending((xs) => xs.filter((x) => x.id !== pid));
+      if (data?.challenge_id) {
+        // reload challenges to include the newly approved one
+        try {
+          const c = await api.get("/challenges");
+          setChallenges(c.data);
+        } catch { /* ignore */ }
+      }
       toast.success("Approved & published");
     } catch (err) {
       toast.error(formatApiError(err));
     }
   };
 
-  const reject = async (pid) => {
+  const reject = async (pending_challenge) => {
+    if (!window.confirm(`Permanently delete pending challenge "${pending_challenge.title}" from ${pending_challenge.company_name}? This cannot be undone.`)) return;
     try {
-      await api.delete(`/admin/pending-challenges/${pid}`);
-      setPending((xs) => xs.filter((x) => x.id !== pid));
-      toast.success("Rejected");
+      await api.delete(`/admin/pending-challenges/${pending_challenge.id}`);
+      setPending((xs) => xs.filter((x) => x.id !== pending_challenge.id));
+      toast.success("Deleted");
+    } catch (err) {
+      toast.error(formatApiError(err));
+    }
+  };
+
+  const deleteChallenge = async (challenge) => {
+    if (!window.confirm(`Permanently delete challenge "${challenge.title}" by ${challenge.org}? This cannot be undone.`)) return;
+    try {
+      await api.delete(`/admin/challenges/${challenge.id}`);
+      setChallenges((xs) => xs.filter((x) => x.id !== challenge.id));
+      toast.success("Challenge deleted");
     } catch (err) {
       toast.error(formatApiError(err));
     }
@@ -206,6 +229,7 @@ export default function Admin() {
         <div className="flex gap-2 mb-6 border-b" style={{ borderColor: "var(--pf-card-border)" }}>
           {[
             { k: "submissions", l: `Submissions (${submissions.length})` },
+            { k: "challenges", l: `Active challenges (${challenges.length})` },
             { k: "pending", l: `Pending challenges (${pending.length})` },
           ].map((t) => (
             <button key={t.k} onClick={() => setTab(t.k)} data-testid={`admin-tab-${t.k}`}
@@ -331,8 +355,42 @@ export default function Admin() {
                   <button onClick={() => approve(p.id)} className="pf-btn-primary text-sm" data-testid={`approve-${p.id}`}>
                     <Check size={16}/> Approve
                   </button>
-                  <button onClick={() => reject(p.id)} className="pf-btn-secondary text-sm" data-testid={`reject-${p.id}`}>
-                    <X size={16}/> Reject
+                  <button onClick={() => reject(p)} className="pf-btn-secondary text-sm" data-testid={`reject-${p.id}`}>
+                    <Trash2 size={16}/> Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {tab === "challenges" && !loading && (
+          <div className="grid lg:grid-cols-2 gap-5" data-testid="admin-challenges-list">
+            {challenges.length === 0 && (
+              <div className="lg:col-span-2 pf-card p-10 text-center text-sm" style={{ color: "var(--pf-muted)" }} data-testid="no-active-challenges">
+                No active challenges.
+              </div>
+            )}
+            {challenges.map((c) => (
+              <div key={c.id} className="pf-card p-6" data-testid={`admin-challenge-${c.id}`}>
+                <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <span className="pf-tag">{c.category}</span>
+                    <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--pf-secondary)" }}>{c.difficulty}</span>
+                  </div>
+                  <span className="text-xs" style={{ color: "var(--pf-muted)" }}>
+                    {c.est_time}
+                  </span>
+                </div>
+                <h3 className="font-display text-xl font-extrabold mb-1">{c.title}</h3>
+                <div className="text-sm font-semibold mb-3">{c.org}</div>
+                <p className="text-sm mb-4 line-clamp-3" style={{ color: "var(--pf-muted)" }}>{c.description || c.problem_statement}</p>
+                <div className="flex gap-2">
+                  <a href={`/challenges/${c.id}`} target="_blank" rel="noreferrer" className="pf-btn-secondary text-sm" data-testid={`view-challenge-${c.id}`}>
+                    <ExternalLink size={16}/> View
+                  </a>
+                  <button onClick={() => deleteChallenge(c)} className="pf-btn-secondary text-sm" data-testid={`delete-challenge-${c.id}`}>
+                    <Trash2 size={16}/> Delete
                   </button>
                 </div>
               </div>

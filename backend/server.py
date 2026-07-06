@@ -505,6 +505,13 @@ async def reject_pending(pid: str, _: bool = Depends(require_admin)):
         raise HTTPException(status_code=404, detail="Not found")
     return {"ok": True}
 
+@api.delete("/admin/challenges/{cid}")
+async def admin_delete_challenge(cid: str, _: bool = Depends(require_admin)):
+    result = await db.challenges.delete_one({"id": cid})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Challenge not found")
+    return {"ok": True}
+
 # ---------- Public Profile ----------
 @api.get("/profile/{student_id}")
 async def public_profile(student_id: str):
