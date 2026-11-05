@@ -171,6 +171,25 @@ function serialize_user(user: User | null | undefined) {
   };
 }
 
+// Public view of a person: everything except private contact details.
+// Used by the Talent Directory and public profiles, which anyone can open.
+function public_user(user: User | null | undefined) {
+  const u = serialize_user(user);
+  if (!u) return null;
+  const { email, ...rest } = u;
+  return rest;
+}
+
+// Public view of a challenge: hides the host's private contact email.
+function public_challenge(c: any) {
+  if (!c) return c;
+  const plain = typeof c.toObject === "function" ? c.toObject() : { ...c };
+  delete plain.contact_email;
+  delete plain._id;
+  delete plain.__v;
+  return plain;
+}
+
 // Auth Middleware
 interface AuthenticatedRequest extends Request {
   user?: User;
@@ -400,7 +419,7 @@ api.get(["/talent", "/students"], async (req, res) => {
     const userProjects = allProjects.filter((p) => p.student_id === u.id);
 
     return {
-      ...serialize_user(u),
+      ...public_user(u),
       verified_submissions_count: verifiedCount,
       total_submissions_count: userSubmissions.length,
       projects_count: userProjects.length,
@@ -451,7 +470,7 @@ api.post("/admin/login", (req, res) => {
 api.get("/challenges", async (req, res) => {
   const category = req.query.category as string;
   const items = await getActiveChallenges(category);
-  return res.json(items);
+  return res.json(items.map(public_challenge));
 });
 
 api.get("/challenges/:cid", async (req, res) => {
@@ -459,7 +478,7 @@ api.get("/challenges/:cid", async (req, res) => {
   if (!item) {
     return res.status(404).json({ detail: "Challenge not found" });
   }
-  return res.json(item);
+  return res.json(public_challenge(item));
 });
 
 api.delete("/admin/challenges/:cid", requireAdmin, async (req, res) => {
@@ -893,7 +912,7 @@ api.get("/profile/:student_id", async (req, res) => {
   );
 
   return res.json({
-    user: serialize_user(user),
+    user: public_user(user),
     completed_challenges: enrichedSubmissions,
     projects: enrichedProjects,
   });
