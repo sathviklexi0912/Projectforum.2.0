@@ -24,7 +24,7 @@ Build a full-stack web app called ProjectForum. It is a platform where students 
 
 ## Implemented (2026-02-26)
 - Backend: 18 endpoints under `/api/*` (auth, challenges, submissions, projects, pending-challenges, admin, profile)
-- 4 seed challenges + 1 demo student (`demo@projectforum.com` / `Demo@123`)
+- 7 seed challenges (no demo account)
 - Frontend: 11 pages with full design system (Syne + Inter, coral/indigo/lavender, dark mode toggle persisted)
 - All flows e2e tested — backend 24/24 pytest pass; frontend Playwright pass
 

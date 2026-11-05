@@ -1,0 +1,261 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  ProjectForum design system: "the brief board", professional edition.
+  A faint dot-grid board, clean cards with soft shadows, teal for actions, amber for emphasis.
+  Brand colour: --pf-primary. Emphasis: --pf-accent. Verified/new: --pf-mark.
+*/
+:root {
+  /* Teal & amber: deep teal for actions, warm amber for emphasis, on a warm off-white board. */
+  --pf-bg: #f5f4ef;            /* board */
+  --pf-dot: #dedbd0;           /* dot grid */
+  --pf-card-bg: #fffdf8;       /* card */
+  --pf-text: #132322;          /* ink (teal-black) */
+  --pf-muted: #566563;
+  --pf-card-border: #e2ded2;   /* hairline card edge */
+  --pf-rule: #ece8de;          /* dividers inside cards */
+  --pf-primary: #0d6b66;       /* teal: actions */
+  --pf-primary-hover: #09524e;
+  --pf-on-primary: #ffffff;
+  --pf-accent: #c8792a;        /* amber: emphasis */
+  --pf-secondary: #132322;
+  --pf-mark: #f6e6c8;          /* sand: verified / new */
+  --pf-on-mark: #6b4210;
+  --pf-ok: #2f8a4f;
+  --pf-tag-bg: #eef0ea;
+  --pf-tag-text: #3d4b49;
+  --pf-shadow-c: rgba(19,35,34,.10);
+  --pf-shadow: 0 1px 2px rgba(19,35,34,.05), 0 4px 14px -6px rgba(19,35,34,.10);
+  --pf-shadow-lg: 0 2px 4px rgba(19,35,34,.06), 0 14px 32px -12px rgba(19,35,34,.22);
+  --font-display: "Schibsted Grotesk", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Figtree", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  color-scheme: light;
+}
+
+.dark {
+  --pf-bg: #0e1615;
+  --pf-dot: #1c2826;
+  --pf-card-bg: #152120;
+  --pf-text: #e8efed;
+  --pf-muted: #9db0ad;
+  --pf-card-border: #253533;
+  --pf-rule: #1f2d2b;
+  --pf-primary: #3fb8ad;
+  --pf-primary-hover: #5fcac0;
+  --pf-on-primary: #0b1312;
+  --pf-accent: #e9a55c;
+  --pf-secondary: #e8efed;
+  --pf-mark: #3d2e17;
+  --pf-on-mark: #f0c98f;
+  --pf-ok: #4cc27a;
+  --pf-tag-bg: #1b2a28;
+  --pf-tag-text: #c0d0cd;
+  --pf-shadow-c: rgba(0,0,0,.4);
+  --pf-shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 18px -8px rgba(0,0,0,.6);
+  --pf-shadow-lg: 0 2px 4px rgba(0,0,0,.35), 0 18px 40px -14px rgba(0,0,0,.75);
+  color-scheme: dark;
+}
+
+html { scroll-behavior: smooth; overflow-x: clip; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--pf-bg);
+  color: var(--pf-text);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color .3s ease, color .3s ease;
+}
+body {
+  overflow-x: clip;
+  background-image: radial-gradient(var(--pf-dot) 1.1px, transparent 1.2px);
+  background-size: 24px 24px;
+  background-attachment: fixed;
+}
+#root { position: relative; z-index: 1; }
+
+h1, h2, h3, h4, h5, h6, .font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.025em;
+  font-variation-settings: "wdth" 100;
+}
+h1, h1.font-display { font-weight: 700 !important; letter-spacing: -0.035em; line-height: 1.05; }
+h2, h2.font-display { font-weight: 700 !important; letter-spacing: -0.03em; }
+h3, h4, h3.font-display, h4.font-display { font-weight: 600 !important; }
+
+::selection { background: var(--pf-primary); color: #fff; }
+:focus-visible { outline: 2.5px solid var(--pf-primary); outline-offset: 3px; border-radius: 6px; }
+
+@layer base {
+  * { border-color: var(--pf-rule); }
+  body { background-color: var(--pf-bg); color: var(--pf-text); }
+}
+
+/* ---------- small type helpers ---------- */
+.pf-kicker {
+  font: 500 .74rem var(--font-mono);
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--pf-muted);
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.pf-mono { font-family: var(--font-mono); }
+.pf-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--pf-ok); box-shadow: 0 0 0 0 rgba(18,162,106,.5); animation: pf-pulse 2.2s infinite; flex-shrink: 0; }
+@keyframes pf-pulse { 70% { box-shadow: 0 0 0 8px rgba(18,162,106,0); } 100% { box-shadow: 0 0 0 0 rgba(18,162,106,0); } }
+
+/* highlighter swipe behind a word */
+.pf-mark { position: relative; z-index: 0; color: var(--pf-accent); }
+.pf-mark::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: .02em; height: .08em; border-radius: 2px;
+  background: currentColor; opacity: .35; transform-origin: 0 50%;
+  animation: pf-swipe .7s .25s cubic-bezier(.6,0,.2,1) both;
+}
+@keyframes pf-swipe { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* sticker: small rotated label */
+.pf-sticker {
+  display: inline-flex; align-items: center; gap: 6px;
+  font: 600 .72rem var(--font-mono); letter-spacing: .06em; text-transform: uppercase;
+  background: var(--pf-card-bg); color: var(--pf-muted);
+  border: 1px solid var(--pf-card-border); border-radius: 999px; padding: 5px 12px;
+}
+
+@layer components {
+/* ---------- cards ---------- */
+.pf-card {
+  position: relative;
+  background-color: var(--pf-card-bg);
+  border: 1px solid var(--pf-card-border);
+  border-radius: 14px;
+  box-shadow: var(--pf-shadow);
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+a.pf-card:hover, .pf-card.pf-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--pf-shadow-lg);
+  border-color: color-mix(in srgb, var(--pf-primary) 30%, var(--pf-card-border));
+}
+
+/* ---------- buttons ---------- */
+.pf-btn-primary {
+  background-color: var(--pf-primary);
+  color: var(--pf-on-primary);
+  font-weight: 600;
+  font-size: .95rem;
+  padding: .7rem 1.25rem;
+  border-radius: 10px;
+  border: 1px solid var(--pf-primary);
+  box-shadow: 0 1px 2px rgba(20,26,46,.12);
+  transition: background-color .15s ease, box-shadow .15s ease;
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  white-space: nowrap; cursor: pointer;
+}
+.pf-btn-primary:hover { background-color: var(--pf-primary-hover); border-color: var(--pf-primary-hover); box-shadow: 0 4px 14px -4px color-mix(in srgb, var(--pf-primary) 55%, transparent); }
+.pf-btn-primary:active { transform: translateY(1px); }
+.pf-btn-primary:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+
+.pf-btn-secondary {
+  background-color: var(--pf-card-bg);
+  border: 1px solid var(--pf-card-border);
+  color: var(--pf-text);
+  font-weight: 600;
+  font-size: .95rem;
+  padding: .7rem 1.25rem;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(20,26,46,.06);
+  transition: border-color .15s ease, background-color .15s ease;
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  white-space: nowrap; cursor: pointer;
+}
+.pf-btn-secondary:hover { border-color: var(--pf-primary); }
+.pf-btn-secondary:active { transform: translateY(1px); }
+
+/* ---------- inputs ---------- */
+.pf-input {
+  width: 100%;
+  background-color: var(--pf-card-bg);
+  border: 1px solid var(--pf-card-border);
+  color: var(--pf-text);
+  border-radius: 10px;
+  padding: .75rem 1rem;
+  font-family: var(--font-body);
+  font-size: 16px; /* stops iOS zooming into fields */
+  outline: none;
+  transition: box-shadow .15s ease, border-color .15s ease;
+}
+.pf-input::placeholder { color: color-mix(in srgb, var(--pf-muted) 75%, transparent); }
+.pf-input:focus { border-color: var(--pf-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--pf-primary) 18%, transparent); }
+select.pf-input { appearance: auto; }
+
+/* ---------- badges & tags ---------- */
+.pf-badge-beginner, .pf-badge-intermediate, .pf-badge-advanced {
+  font-family: var(--font-mono) !important; font-weight: 600 !important; letter-spacing: .05em;
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+}
+.pf-badge-beginner { background: #dcf7ea; color: #0b6b46; }
+.dark .pf-badge-beginner { background: #0f3a2a; color: #5ee0a5; }
+.pf-badge-intermediate { background: #fbf1d3; color: #7a5600; }
+.dark .pf-badge-intermediate { background: #3a3012; color: #f0cf6a; }
+.pf-badge-advanced { background: #ffe0e6; color: #b0123a; }
+.dark .pf-badge-advanced { background: #44121f; color: #ff8aa3; }
+
+.pf-tag {
+  background: var(--pf-tag-bg);
+  color: var(--pf-tag-text);
+  padding: .18rem .6rem;
+  border-radius: 999px;
+  font: 600 .74rem var(--font-body);
+  display: inline-block;
+}
+
+.pf-link {
+  color: var(--pf-primary);
+  font-weight: 700;
+  text-decoration: none;
+  text-underline-offset: 3px;
+  transition: color .2s ease;
+}
+.pf-link:hover { color: var(--pf-primary-hover); text-decoration: underline; }
+}
+
+/* ---------- empty states ---------- */
+.pf-empty {
+  border: 1px dashed color-mix(in srgb, var(--pf-muted) 40%, transparent);
+  border-radius: 14px;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  background: color-mix(in srgb, var(--pf-card-bg) 75%, transparent);
+}
+.pf-empty h3 { font-size: 1.25rem; margin: .8rem 0 .25rem; }
+.pf-empty p { color: var(--pf-muted); font-size: .95rem; max-width: 44ch; margin: 0 auto; }
+.pf-empty .pf-empty-icon {
+  width: 52px; height: 52px; margin: 0 auto; border-radius: 14px; display: grid; place-items: center;
+  border: 1px solid var(--pf-card-border); background: var(--pf-tag-bg); color: var(--pf-primary);
+}
+
+/* ---------- motion ---------- */
+.pf-progress { position: fixed; top: 0; left: 0; height: 3px; width: 100%; background: var(--pf-primary); transform-origin: 0 50%; transform: scaleX(0); z-index: 60; pointer-events: none; }
+.pf-burst { position: fixed; width: 7px; height: 7px; border-radius: 50%; background: var(--pf-primary); pointer-events: none; z-index: 90; }
+.pf-fade-up { animation: pf-fadeup .55s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes pf-fadeup { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.pf-reveal { opacity: 0; transform: translateY(22px); transition: opacity .6s cubic-bezier(.2,.8,.2,1), transform .6s cubic-bezier(.2,.8,.2,1); }
+.pf-reveal.in { opacity: 1; transform: none; }
+
+/* ticker of live briefs */
+.pf-ticker { overflow: hidden; border-block: 1px solid var(--pf-card-border); background: var(--pf-card-bg); color: var(--pf-text); }
+.pf-ticker-track { display: flex; width: max-content; animation: pf-scroll 70s linear infinite; }
+.pf-ticker:hover .pf-ticker-track { animation-play-state: paused; }
+@keyframes pf-scroll { to { transform: translateX(-50%); } }
+
+/* toast restyle (sonner) */
+[data-sonner-toast] { font-family: var(--font-body) !important; border-radius: 12px !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .pf-reveal { opacity: 1; transform: none; }
+}

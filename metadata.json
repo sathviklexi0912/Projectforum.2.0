@@ -1,0 +1,6 @@
+{
+  "name": "ProjectForum",
+  "description": "Your work speaks louder than your resume. A platform for students to complete real-world company challenges and build verified portfolios.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
