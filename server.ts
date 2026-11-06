@@ -590,6 +590,41 @@ api.post("/admin/challenges/practice", requireAdmin, async (req, res) => {
 });
 
 // ---------- Admin: manage people ----------
+// ---------- Admin: backup ----------
+// Downloads everything needed to restore the site: people (with scrambled passwords, never plain text),
+// challenges, submissions, projects and pending proposals. Reset codes are left out on purpose.
+api.get("/admin/backup", requireAdmin, async (req, res) => {
+  const strip = (rows: any[]) =>
+    rows.map((r) => {
+      const plain = typeof r?.toObject === "function" ? r.toObject() : { ...r };
+      delete plain._id;
+      delete plain.__v;
+      return plain;
+    });
+  const [users, challenges, submissions, projects, proposals] = await Promise.all([
+    getAllUsers(), getAllChallenges(), getAllSubmissions(), getAllProjects(), getPendingChallenges(),
+  ]);
+  const now = new Date();
+  const stamp = new Date(now.getTime() + 5.5 * 3600000).toISOString().slice(0, 10);
+  const backup = {
+    about: "KIVO backup. Contains personal data: store it somewhere private and delete old copies you no longer need.",
+    created_at: now.toISOString(),
+    counts: {
+      users: users.length, challenges: challenges.length, submissions: submissions.length,
+      projects: projects.length, pending_challenges: proposals.length,
+    },
+    users: strip(users),
+    challenges: strip(challenges),
+    submissions: strip(submissions),
+    projects: strip(projects),
+    pending_challenges: strip(proposals),
+  };
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+  res.setHeader("Content-Disposition", `attachment; filename="kivo-backup-${stamp}.json"`);
+  res.setHeader("Cache-Control", "no-store");
+  return res.send(JSON.stringify(backup, null, 2));
+});
+
 api.get("/admin/users", requireAdmin, async (req, res) => {
   const [users, subs, projects] = await Promise.all([getAllUsers(), getAllSubmissions(), getAllProjects()]);
   return res.json(

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CalendarClock, Trash2, Users, LayoutList, Plus, Check, X, Pencil } from "lucide-react";
+import { CalendarClock, Trash2, Users, LayoutList, Plus, Check, X, Pencil, Download, DatabaseBackup } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 
@@ -239,6 +239,64 @@ function ChallengeRow({ c, headers, onChanged }) {
   );
 }
 
+/* Weekly backup: downloads a copy of all site data to your computer. */
+function BackupPanel({ headers }) {
+  const [busy, setBusy] = useState(false);
+  const [last, setLast] = useState(() => {
+    try { return localStorage.getItem("kivo_last_backup") || ""; } catch { return ""; }
+  });
+  const daysSince = last ? Math.floor((Date.now() - new Date(last).getTime()) / 86400000) : null;
+  const overdue = daysSince === null || daysSince >= 7;
+
+  const download = async () => {
+    setBusy(true);
+    try {
+      const res = await api.get("/admin/backup", { headers, responseType: "blob" });
+      const name = (res.headers?.["content-disposition"] || "").match(/filename="([^"]+)"/)?.[1] || "kivo-backup.json";
+      const url = URL.createObjectURL(res.data);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      const now = new Date().toISOString();
+      try { localStorage.setItem("kivo_last_backup", now); } catch { /* ignore */ }
+      setLast(now);
+      toast.success(`Backup saved as ${name}`);
+    } catch (err) {
+      toast.error("Could not create the backup. Try again in a minute.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section data-testid="admin-backup">
+      <div className="pf-card p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        style={overdue ? { borderColor: "color-mix(in srgb, var(--pf-accent) 55%, var(--pf-card-border))" } : undefined}>
+        <div className="flex items-start gap-3 min-w-0">
+          <DatabaseBackup className="w-5 h-5 mt-0.5 shrink-0" style={{ color: "var(--pf-primary)" }} />
+          <div>
+            <p className="font-semibold">Backup</p>
+            <p className="text-sm" style={{ color: "var(--pf-muted)" }}>
+              The free database plan keeps no backups. Download a copy weekly and keep it somewhere private, since it contains personal data.
+            </p>
+            <p className="text-xs mt-1 font-semibold" style={{ color: overdue ? "var(--pf-accent)" : "var(--pf-muted)" }} data-testid="backup-status">
+              {last ? `Last downloaded on this device ${daysSince === 0 ? "today" : `${daysSince} day${daysSince === 1 ? "" : "s"} ago`}` : "No backup downloaded on this device yet"}
+              {overdue ? " · due now" : ""}
+            </p>
+          </div>
+        </div>
+        <button type="button" onClick={download} disabled={busy} className="pf-btn-primary !py-2 !px-4 !text-sm shrink-0" data-testid="download-backup">
+          <Download className="w-4 h-4" /> {busy ? "Preparing…" : "Download backup"}
+        </button>
+      </div>
+    </section>
+  );
+}
+
 export default function AdminManage({ adminPassword }) {
   const headers = { "x-admin-password": adminPassword };
   const [challenges, setChallenges] = useState([]);
@@ -288,6 +346,8 @@ export default function AdminManage({ adminPassword }) {
 
   return (
     <>
+      <BackupPanel headers={headers} />
+
       {/* ---------- Challenges ---------- */}
       <section data-testid="admin-challenges">
         <div className="flex flex-wrap items-end justify-between gap-3 mb-4">
