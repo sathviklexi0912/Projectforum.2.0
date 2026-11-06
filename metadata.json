@@ -1,6 +1,6 @@
 {
-  "name": "ProjectForum",
-  "description": "Your work speaks louder than your resume. A platform for students to complete real-world company challenges and build verified portfolios.",
+  "name": "KIVO",
+  "description": "KIVO — Make your work matter. Organisations post real business problems; people solve them, get verified, and build a profile that shows what they can do.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

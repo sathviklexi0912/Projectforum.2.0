@@ -75,7 +75,7 @@ export default function PublicProfile() {
                 </div>
 
                 <p className="text-sm font-semibold mt-1" style={{ color: "var(--pf-muted)" }}>
-                  {user.headline || "ProjectForum contributor"}
+                  {user.headline || "KIVO contributor"}
                 </p>
 
                 {(user.university || profileSubtitle(user)) && (
@@ -146,7 +146,7 @@ export default function PublicProfile() {
 
                   <div className="pt-4 border-t border-[var(--pf-card-border)] flex items-center justify-between">
                     <span className="text-xs font-medium" style={{ color: "var(--pf-muted)" }}>
-                      Org: {proj.org || "ProjectForum"}
+                      Org: {proj.org || "KIVO"}
                     </span>
                     {proj.link && (
                       <a

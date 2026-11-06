@@ -3,22 +3,25 @@ import { createContext, useContext, useEffect, useState } from "react";
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
+  // Dark is the default. Only an explicit switch to light is remembered.
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem("pf_theme") || "light";
+    try {
+      return localStorage.getItem("kivo_theme") === "light" ? "light" : "dark";
+    } catch {
+      return "dark";
+    }
   });
 
   useEffect(() => {
-    const root = document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-    localStorage.setItem("pf_theme", theme);
+    document.documentElement.classList.toggle("dark", theme === "dark");
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+    setTheme((prev) => {
+      const next = prev === "light" ? "dark" : "light";
+      try { localStorage.setItem("kivo_theme", next); } catch { /* storage blocked: theme still switches */ }
+      return next;
+    });
   };
 
   return (

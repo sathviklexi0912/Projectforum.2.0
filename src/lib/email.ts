@@ -31,7 +31,7 @@ export async function sendPasswordResetEmail({
   resetToken,
 }: SendResetEmailParams): Promise<SendEmailResult> {
   const apiKey = process.env.RESEND_API_KEY;
-  const fromAddress = process.env.RESEND_FROM_EMAIL || "ProjectForum <onboarding@resend.dev>";
+  const fromAddress = process.env.RESEND_FROM_EMAIL || "KIVO <onboarding@resend.dev>";
 
   if (!apiKey) {
     console.warn(
@@ -50,7 +50,7 @@ export async function sendPasswordResetEmail({
 
   try {
     const greeting = userName ? `Hello ${userName},` : "Hello,";
-    const subject = "Your ProjectForum Password Reset Code";
+    const subject = "Your KIVO Password Reset Code";
     const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -62,14 +62,14 @@ export async function sendPasswordResetEmail({
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 28px 16px; color: #1e293b;">
   <div style="max-width: 520px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 36px 32px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04);">
     <div style="margin-bottom: 24px; text-align: center;">
-      <h1 style="color: #2563eb; font-size: 24px; font-weight: 800; margin: 0; letter-spacing: -0.5px;">ProjectForum</h1>
+      <h1 style="color: #2563eb; font-size: 24px; font-weight: 800; margin: 0; letter-spacing: -0.5px;">KIVO</h1>
       <p style="color: #64748b; font-size: 13px; margin: 4px 0 0 0;">Student Portfolio & Verified Industry Challenges</p>
     </div>
 
     <h2 style="font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 12px 0;">Reset Your Password</h2>
     <p style="font-size: 14px; line-height: 1.6; color: #334155; margin: 0 0 20px 0;">
       ${greeting}<br><br>
-      We received a request to reset your password for your ProjectForum account (<strong>${toEmail}</strong>). Please enter the verification code below to proceed:
+      We received a request to reset your password for your KIVO account (<strong>${toEmail}</strong>). Please enter the verification code below to proceed:
     </p>
 
     <div style="background-color: #f1f5f9; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 22px; text-align: center; margin: 24px 0;">
@@ -86,7 +86,7 @@ export async function sendPasswordResetEmail({
     <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 28px 0 20px 0;" />
 
     <p style="font-size: 11px; color: #94a3b8; text-align: center; margin: 0;">
-      Sent securely by ProjectForum • Automated authentication system
+      Sent securely by KIVO • Automated authentication system
     </p>
   </div>
 </body>
@@ -95,13 +95,13 @@ export async function sendPasswordResetEmail({
 
     const text = `${greeting}
 
-We received a request to reset your password for your ProjectForum account (${toEmail}).
+We received a request to reset your password for your KIVO account (${toEmail}).
 
 Your Password Reset Code is: ${resetToken}
 
 This code is valid for 15 minutes. If you did not request this password reset, you can safely ignore this email.
 
-— ProjectForum Security Team`;
+— KIVO Security Team`;
 
     const response = await resend.emails.send({
       from: fromAddress,

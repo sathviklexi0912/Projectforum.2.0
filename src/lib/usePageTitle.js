@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 
-const BASE = "ProjectForum";
+const BASE = "KIVO";
 
-/* Sets the browser-tab title for a page, e.g. "Browse challenges · ProjectForum". */
+/* Sets the browser-tab title for a page, e.g. "Browse challenges · KIVO". */
 export default function usePageTitle(title) {
   useEffect(() => {
-    document.title = title ? `${title} · ${BASE}` : `${BASE} — Prove your skills on real business problems`;
+    document.title = title ? `${title} · ${BASE}` : `${BASE} — Make your work matter`;
   }, [title]);
 }

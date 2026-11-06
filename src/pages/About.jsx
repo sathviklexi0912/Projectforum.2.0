@@ -40,7 +40,7 @@ export default function About() {
         <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-12 md:pt-20 pb-6">
           <span className="pf-kicker">About {BRAND_NAME}</span>
           <h1 className="font-display text-[clamp(2.4rem,6vw,4.2rem)] mt-4 max-w-[18ch]">
-            Turning <span className="pf-mark">real work</span> into real opportunities.
+            Make your <span className="pf-mark">work</span> matter.
           </h1>
           <p className="mt-6 text-[1.12rem] max-w-[60ch]" style={{ color: "var(--pf-muted)" }}>
             {BRAND_NAME} is a platform where organisations post real business problems and people solve them. The best work is verified by the
@@ -134,7 +134,7 @@ export default function About() {
             <div>
               <span className="pf-kicker">From the founder</span>
               <p className="font-display text-[1.35rem] leading-snug mt-2 max-w-[48ch]">
-                "I started {BRAND_NAME} because I kept seeing capable people get filtered out by a one-page resume. Real work should speak for itself."
+                "I started {BRAND_NAME} because I kept seeing capable people get filtered out by a one-page resume. Your work should matter more than how you describe it."
               </p>
               <p className="mt-3 text-sm" style={{ color: "var(--pf-muted)" }}>
                 <b style={{ color: "var(--pf-text)" }}>{FOUNDER_NAME}</b>, Founder · Bengaluru, India

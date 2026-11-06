@@ -200,7 +200,7 @@ export default function TalentDirectory() {
                   </div>
 
                   <p className="text-xs font-semibold mb-3 line-clamp-2" style={{ color: "var(--pf-muted)" }}>
-                    {student.headline || "ProjectForum contributor"}
+                    {student.headline || "KIVO contributor"}
                   </p>
 
                   {student.skills && student.skills.length > 0 && (

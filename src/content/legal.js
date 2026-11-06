@@ -1,5 +1,5 @@
 /*
-  ProjectForum legal pages.
+  KIVO legal pages.
   Edit the wording here; the Terms and Privacy pages render from this file.
   When the wording changes in a way users should agree to again, bump TERMS_VERSION
   (it is saved with each new sign-up as a record of what they accepted).
@@ -16,12 +16,12 @@ export const OPERATOR = "Sathvik Suresh";
 export const TERMS = {
   title: "Terms of Service",
   intro: [
-    `Welcome to ProjectForum (the "Platform"). These Terms of Service ("Terms") are a binding agreement between you ("you", "User") and ${OPERATOR}, who operates ProjectForum as an individual sole proprietor based in Bengaluru, Karnataka, India ("we", "us", "the Operator"). By creating an account or using the Platform, you agree to these Terms and to our Privacy Policy.`,
+    `Welcome to KIVO (the "Platform"). These Terms of Service ("Terms") are a binding agreement between you ("you", "User") and ${OPERATOR}, who operates KIVO as an individual sole proprietor based in Bengaluru, Karnataka, India ("we", "us", "the Operator"). By creating an account or using the Platform, you agree to these Terms and to our Privacy Policy.`,
   ],
   sections: [
     {
       id: "who-can-use",
-      title: "Who can use ProjectForum",
+      title: "Who can use KIVO",
       body: [
         {
           list: [
@@ -34,9 +34,9 @@ export const TERMS = {
     },
     {
       id: "what-we-do",
-      title: "What ProjectForum does",
+      title: "What KIVO does",
       body: [
-        "ProjectForum is a platform where people (students, graduates, working professionals and career-switchers, called \"Contributors\") create profiles, complete challenges posted by organisations, showcase their work, and can be discovered by recruiters and organisations.",
+        "KIVO is a platform where people (students, graduates, working professionals and career-switchers, called \"Contributors\") create profiles, complete challenges posted by organisations, showcase their work, and can be discovered by recruiters and organisations.",
         "We provide the Platform and its tools. We do not employ Contributors, guarantee any opportunity, interview or job, or act as a recruitment agency.",
       ],
     },
@@ -173,7 +173,7 @@ export const TERMS = {
 export const PRIVACY = {
   title: "Privacy Policy",
   intro: [
-    `This Privacy Policy explains what personal data ProjectForum (the "Platform"), operated by ${OPERATOR} ("we", "us"), collects, why, who can see it, and your rights over it. It is written to follow India's Digital Personal Data Protection Act, 2023 (the "DPDP Act").`,
+    `This Privacy Policy explains what personal data KIVO (the "Platform"), operated by ${OPERATOR} ("we", "us"), collects, why, who can see it, and your rights over it. It is written to follow India's Digital Personal Data Protection Act, 2023 (the "DPDP Act").`,
   ],
   sections: [
     {
@@ -226,7 +226,7 @@ export const PRIVACY = {
       id: "visible",
       title: "What other people can see",
       body: [
-        "ProjectForum is a discovery platform, so parts of your profile are public by design:",
+        "KIVO is a discovery platform, so parts of your profile are public by design:",
         {
           list: [
             "**Public:** your name, headline, institution or role, skills, bio, location, LinkedIn link, \"open to opportunities\" status, projects and submissions, and verification details (including the verifier's name and title).",

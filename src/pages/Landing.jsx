@@ -131,7 +131,7 @@ export default function Landing() {
             </h1>
 
             <p className="mt-6 text-[1.12rem] max-w-[46ch]" style={{ color: "var(--pf-muted)" }}>
-              ProjectForum connects people who want to demonstrate their abilities with organisations that have real problems to solve. Complete a brief, have your work verified by the host, and build a profile that speaks for you.
+              KIVO connects people who want to demonstrate their abilities with organisations that have real problems to solve. Complete a brief, have your work verified by the host, and build a profile that speaks for you.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
