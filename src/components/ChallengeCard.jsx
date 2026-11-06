@@ -20,6 +20,10 @@ const CAT = {
   Strategy: ["#e7e8fb", "#33328f"],
   Entrepreneurship: ["#f8efd6", "#6e5208"],
   Tech: ["#e1f0f7", "#175470"],
+  Engineering: ["#e1f0f7", "#175470"],
+  "Data & AI": ["#eae6f7", "#4a3a8a"],
+  Operations: ["#efece4", "#5a4a2a"],
+  Design: ["#f7e6ee", "#7a2a50"],
 };
 export function categoryColors(cat) {
   return CAT[cat] || ["#e7e8f0", "#33364f"];

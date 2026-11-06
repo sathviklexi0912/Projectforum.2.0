@@ -1,10 +1,11 @@
 import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Search, GraduationCap, ShieldCheck, Linkedin, ArrowRight, User, Filter, CheckCircle2, X } from "lucide-react";
+import { Search, GraduationCap, Briefcase, ShieldCheck, Linkedin, ArrowRight, User, Filter, CheckCircle2, X } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { api } from "@/lib/api";
 import usePageTitle from "@/lib/usePageTitle";
+import { profileSubtitle } from "@/components/ProfileTypeFields";
 
 const SKILL_FILTERS = ["All", "Marketing", "Finance", "Strategy", "Analytics", "Tech", "GTM"];
 
@@ -180,10 +181,12 @@ export default function TalentDirectory() {
                             <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" title="Verified Contributor" />
                           )}
                         </h3>
-                        {student.university && (
+                        {(student.university || profileSubtitle(student)) && (
                           <p className="text-xs flex items-center gap-1 mt-0.5" style={{ color: "var(--pf-muted)" }}>
-                            <GraduationCap className="w-3.5 h-3.5 text-[var(--pf-secondary)]" />
-                            <span>{student.university}</span>
+                            {student.profile_type === "professional"
+                              ? <Briefcase className="w-3.5 h-3.5 text-[var(--pf-secondary)] shrink-0" />
+                              : <GraduationCap className="w-3.5 h-3.5 text-[var(--pf-secondary)] shrink-0" />}
+                            <span className="truncate">{student.profile_type === "professional" ? [student.current_role, student.university].filter(Boolean).join(" · ") : student.university}</span>
                           </p>
                         )}
                       </div>

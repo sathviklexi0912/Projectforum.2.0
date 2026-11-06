@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import usePageTitle from "@/lib/usePageTitle";
+import ProfileTypeFields from "@/components/ProfileTypeFields";
 
 export default function EditProfile() {
   const { user, updateProfile } = useAuth();
@@ -21,6 +22,9 @@ export default function EditProfile() {
     bio: "",
     open_to_opportunities: true,
     skills: "",
+    profile_type: "student",
+    current_role: "",
+    experience_years: "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -36,6 +40,9 @@ export default function EditProfile() {
         bio: user.bio || "",
         open_to_opportunities: user.open_to_opportunities !== false,
         skills: Array.isArray(user.skills) ? user.skills.join(", ") : user.skills || "",
+        profile_type: user.profile_type || "student",
+        current_role: user.current_role || "",
+        experience_years: user.experience_years || "",
       });
     }
   }, [user]);
@@ -103,41 +110,13 @@ export default function EditProfile() {
                 name="headline"
                 value={formData.headline}
                 onChange={handleChange}
-                placeholder="Product Strategist | Data Science Enthusiast"
+                placeholder="e.g. Brand strategist who loves D2C problems"
                 data-testid="edit-headline-input"
                 className="pf-input"
               />
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: "var(--pf-muted)" }}>
-                  University / organisation
-                </label>
-                <input
-                  type="text"
-                  name="university"
-                  value={formData.university}
-                  onChange={handleChange}
-                  data-testid="edit-university-input"
-                  className="pf-input"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: "var(--pf-muted)" }}>
-                  Graduation Year / Class
-                </label>
-                <input
-                  type="text"
-                  name="year"
-                  value={formData.year}
-                  onChange={handleChange}
-                  data-testid="edit-year-input"
-                  className="pf-input"
-                />
-              </div>
-            </div>
+            <ProfileTypeFields value={formData} onChange={setFormData} idPrefix="edit" />
 
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: "var(--pf-muted)" }}>

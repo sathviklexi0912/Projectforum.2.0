@@ -4,7 +4,7 @@ import { LayoutDashboard, Grid3x3, FileText, Briefcase, User, Plus, X, ExternalL
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import ChallengeCard from "@/components/ChallengeCard";
-import { api, formatApiError, initialsFromName, daysRemaining } from "@/lib/api";
+import { api, formatApiError, initialsFromName, daysRemaining, categoryFilters } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import usePageTitle from "@/lib/usePageTitle";
 
@@ -26,7 +26,6 @@ const STATUS_COLORS = {
 const SKILLS = ["Marketing", "Finance", "Consulting", "Entrepreneurship", "Analytics", "HR", "Operations", "Strategy"];
 const YEARS = ["1st", "2nd", "3rd", "Final", "Postgrad"];
 const PROJECT_CATEGORIES = ["Marketing", "Finance", "Strategy", "Design", "Tech", "Other"];
-const FILTERS = ["All", "Marketing", "Finance", "Strategy", "Entrepreneurship", "Tech"];
 
 function StatCard({ label, value, color, testId }) {
   return (
@@ -150,8 +149,8 @@ function ChallengesTab({ challenges, filter, setFilter }) {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {FILTERS.map((f) => (
-            <button key={f} onClick={() => setFilter(f)} data-testid={`dash-filter-${f.toLowerCase()}`}
+          {categoryFilters(challenges).map((f) => (
+            <button key={f} onClick={() => setFilter(f)} data-testid={`dash-filter-${f.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
               className="px-4 py-2 rounded-full text-sm font-semibold transition-all"
               style={f === filter
                 ? { background: "var(--pf-primary)", color: "#fff" }

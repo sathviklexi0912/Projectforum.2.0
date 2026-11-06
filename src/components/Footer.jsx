@@ -27,8 +27,12 @@ export default function Footer() {
         </nav>
       </div>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-8 pt-5 flex flex-wrap justify-between gap-2 text-xs border-t" style={{ color: "var(--pf-muted)", borderColor: "var(--pf-rule)" }}>
-        <span>© {new Date().getFullYear()} ProjectForum. All rights reserved.</span>
-        <span className="pf-mono">Built in Bengaluru</span>
+        <span>© {new Date().getFullYear()} Sathvik Suresh. ProjectForum. All rights reserved.</span>
+        <span className="flex flex-wrap gap-4">
+          <Link to="/terms" className="hover:text-[var(--pf-text)] transition-colors" data-testid="footer-terms">Terms</Link>
+          <Link to="/privacy" className="hover:text-[var(--pf-text)] transition-colors" data-testid="footer-privacy">Privacy</Link>
+          <span className="pf-mono">Built in Bengaluru</span>
+        </span>
       </div>
     </footer>
   );

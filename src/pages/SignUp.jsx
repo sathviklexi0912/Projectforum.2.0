@@ -4,8 +4,9 @@ import { useAuth } from "@/context/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { toast } from "sonner";
-import { User, Mail, Lock, GraduationCap, Linkedin, Award } from "lucide-react";
+import { User, Mail, Lock, Linkedin } from "lucide-react";
 import usePageTitle from "@/lib/usePageTitle";
+import ProfileTypeFields from "@/components/ProfileTypeFields";
 
 export default function SignUp() {
   usePageTitle("Create your profile");
@@ -18,7 +19,11 @@ export default function SignUp() {
     year: "",
     linkedin: "",
     headline: "",
+    profile_type: "student",
+    current_role: "",
+    experience_years: "",
   });
+  const [accepted, setAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -29,9 +34,13 @@ export default function SignUp() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!accepted) {
+      toast.error("Please confirm you are 18 or older and accept the Terms and Privacy Policy.");
+      return;
+    }
     setLoading(true);
     try {
-      await register(formData);
+      await register({ ...formData, accept_terms: true });
       toast.success("Account created successfully!");
       navigate("/dashboard");
     } catch (err) {
@@ -49,7 +58,7 @@ export default function SignUp() {
           <div className="text-center mb-8">
             <h1 className="font-display text-3xl font-bold">Create your profile</h1>
             <p className="text-sm mt-2" style={{ color: "var(--pf-muted)" }}>
-              Showcase your work to real companies and hiring teams
+              Show organisations and hiring teams what you can do
             </p>
           </div>
 
@@ -66,7 +75,7 @@ export default function SignUp() {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="Alex Morgan"
+                  placeholder="Your full name"
                   data-testid="signup-name-input"
                   className="pf-input pl-10"
                 />
@@ -114,36 +123,7 @@ export default function SignUp() {
               <p className="text-xs mt-1.5" style={{ color: "var(--pf-muted)" }}>Use at least 8 characters.</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: "var(--pf-muted)" }}>
-                  University / organisation
-                </label>
-                <input
-                  type="text"
-                  name="university"
-                  value={formData.university}
-                  onChange={handleChange}
-                  placeholder="CHRIST University / Infosys"
-                  data-testid="signup-university-input"
-                  className="pf-input"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: "var(--pf-muted)" }}>
-                  Year / Status
-                </label>
-                <input
-                  type="text"
-                  name="year"
-                  value={formData.year}
-                  onChange={handleChange}
-                  placeholder="3rd Year / 2025"
-                  data-testid="signup-year-input"
-                  className="pf-input"
-                />
-              </div>
-            </div>
+            <ProfileTypeFields value={formData} onChange={setFormData} idPrefix="signup" />
 
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: "var(--pf-muted)" }}>
@@ -154,7 +134,7 @@ export default function SignUp() {
                 name="headline"
                 value={formData.headline}
                 onChange={handleChange}
-                placeholder="Aspiring Product Manager | Growth Strategist"
+                placeholder="e.g. Marketing student who loves go-to-market problems"
                 data-testid="signup-headline-input"
                 className="pf-input"
               />
@@ -177,6 +157,23 @@ export default function SignUp() {
                 />
               </div>
             </div>
+
+            <label className="flex items-start gap-3 text-sm pt-2 cursor-pointer" htmlFor="signup-accept-terms">
+              <input
+                id="signup-accept-terms"
+                type="checkbox"
+                required
+                checked={accepted}
+                onChange={(e) => setAccepted(e.target.checked)}
+                className="mt-0.5 w-4 h-4 shrink-0 accent-[var(--pf-primary)]"
+                data-testid="signup-accept-terms"
+              />
+              <span style={{ color: "var(--pf-muted)" }}>
+                I am 18 or older and I agree to the{" "}
+                <Link to="/terms" target="_blank" className="pf-link">Terms of Service</Link> and{" "}
+                <Link to="/privacy" target="_blank" className="pf-link">Privacy Policy</Link>.
+              </span>
+            </label>
 
             <button
               type="submit"

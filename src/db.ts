@@ -17,6 +17,11 @@ export interface User {
   location?: string;
   headline?: string;
   open_to_opportunities?: boolean;
+  profile_type?: string;      // "student" | "graduate" | "professional"
+  current_role?: string;      // e.g. "Marketing Analyst at Zomato"
+  experience_years?: string;  // e.g. "2"
+  terms_accepted_at?: string; // when they confirmed 18+ and accepted Terms & Privacy
+  terms_version?: string;
   created_at: string;
 }
 
@@ -107,6 +112,11 @@ const userSchema = new mongoose.Schema<User>({
   location: { type: String, default: "" },
   headline: { type: String, default: "" },
   open_to_opportunities: { type: Boolean, default: true },
+  profile_type: { type: String, default: "student" },
+  current_role: { type: String, default: "" },
+  experience_years: { type: String, default: "" },
+  terms_accepted_at: { type: String, default: "" },
+  terms_version: { type: String, default: "" },
   created_at: { type: String, default: () => new Date().toISOString() },
 });
 

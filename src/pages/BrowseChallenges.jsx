@@ -3,10 +3,9 @@ import { Search, X } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ChallengeCard from "@/components/ChallengeCard";
-import { api } from "@/lib/api";
+import { api, categoryFilters } from "@/lib/api";
 import usePageTitle from "@/lib/usePageTitle";
 
-const FILTERS = ["All", "Marketing", "Finance", "Strategy", "Entrepreneurship", "Tech"];
 
 export default function BrowseChallenges() {
   const [filter, setFilter] = useState("All");
@@ -85,13 +84,13 @@ export default function BrowseChallenges() {
           {/* Category Filter Chips */}
           <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
             <div className="flex flex-wrap gap-2" data-testid="filter-chips">
-              {FILTERS.map((f) => {
+              {categoryFilters(items).map((f) => {
                 const active = filter === f;
                 return (
                   <button
                     key={f}
                     onClick={() => setFilter(f)}
-                    data-testid={`filter-${f.toLowerCase()}`}
+                    data-testid={`filter-${f.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
                     className="px-4 py-2 rounded-full text-sm font-semibold transition-all"
                     style={active
                       ? { background: "var(--pf-primary)", color: "#fff", border: "1px solid var(--pf-primary)" }

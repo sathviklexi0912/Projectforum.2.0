@@ -70,6 +70,12 @@ if (IS_PROD) {
 }
 
 const MIN_PASSWORD_LENGTH = 8;
+// Must match TERMS_VERSION in src/content/legal.js
+const TERMS_VERSION = "2026-11-06";
+const PROFILE_TYPES = ["student", "graduate", "professional"];
+function cleanProfileType(v: any): string {
+  return PROFILE_TYPES.includes(String(v)) ? String(v) : "student";
+}
 
 // Simple in-memory attempt limiter: max `max` failures per key within `windowMs`.
 function makeLimiter(max: number, windowMs: number) {
@@ -172,6 +178,9 @@ function serialize_user(user: User | null | undefined) {
     location: user.location || "",
     headline: user.headline || "",
     open_to_opportunities: user.open_to_opportunities !== false,
+    profile_type: user.profile_type || "student",
+    current_role: user.current_role || "",
+    experience_years: user.experience_years || "",
     created_at: user.created_at || "",
   };
 }
@@ -185,10 +194,28 @@ function public_user(user: User | null | undefined) {
   return rest;
 }
 
+// Turns "a\nb\nc", "a, b, c" or ["a\nb", "c"] into a clean list: ["a", "b", "c"].
+// Line breaks win over commas, so an item like "Channel plan, with budget" on its own line stays whole.
+function toList(v: any): string[] {
+  const parts: string[] = Array.isArray(v) ? v.map(String) : typeof v === "string" ? [v] : [];
+  const out: string[] = [];
+  for (const p of parts) {
+    const pieces = /\r?\n/.test(p) ? p.split(/\r?\n/) : Array.isArray(v) ? [p] : p.split(",");
+    for (const piece of pieces) {
+      const clean = piece.replace(/^\s*(?:[-*•–]|\d+[.)])\s*/, "").trim();
+      if (clean) out.push(clean);
+    }
+  }
+  return out;
+}
+
 // Public view of a challenge: hides the host's private contact email.
 function public_challenge(c: any) {
   if (!c) return c;
   const plain = typeof c.toObject === "function" ? c.toObject() : { ...c };
+  plain.deliverables = toList(plain.deliverables);
+  plain.rubric = toList(plain.rubric);
+  plain.tags = toList(plain.tags);
   delete plain.contact_email;
   delete plain._id;
   delete plain.__v;
@@ -262,9 +289,13 @@ api.get("/health", async (req, res) => {
 
 // ---------- Auth Endpoints ----------
 api.post("/auth/register", async (req, res) => {
-  const { name, email, password, university, degree, year, linkedin, skills, bio, location, headline } = req.body;
+  const { name, email, password, university, degree, year, linkedin, skills, bio, location, headline,
+    profile_type, current_role, experience_years, accept_terms } = req.body;
   if (!email || !password || !name) {
     return res.status(400).json({ detail: "Name, email and password are required" });
+  }
+  if (accept_terms !== true) {
+    return res.status(400).json({ detail: "Please confirm you are 18 or older and accept the Terms of Service and Privacy Policy." });
   }
   if (String(password).length < MIN_PASSWORD_LENGTH) {
     return res.status(400).json({ detail: `Password must be at least ${MIN_PASSWORD_LENGTH} characters.` });
@@ -289,6 +320,11 @@ api.post("/auth/register", async (req, res) => {
     location: location || "",
     headline: headline || "",
     open_to_opportunities: true,
+    profile_type: cleanProfileType(profile_type),
+    current_role: current_role || "",
+    experience_years: experience_years ? String(experience_years) : "",
+    terms_accepted_at: now_iso(),
+    terms_version: TERMS_VERSION,
     created_at: now_iso(),
   };
   await createUser(user);
@@ -397,7 +433,9 @@ api.post("/auth/reset-password", async (req, res) => {
 
 api.patch("/auth/me", getCurrentUser, async (req: AuthenticatedRequest, res) => {
   const user = req.user!;
-  const allowed = ["name", "university", "degree", "year", "linkedin", "skills", "bio", "location", "headline", "open_to_opportunities"];
+  const allowed = ["name", "university", "degree", "year", "linkedin", "skills", "bio", "location", "headline", "open_to_opportunities",
+    "profile_type", "current_role", "experience_years"];
+  if (req.body && "profile_type" in req.body) req.body.profile_type = cleanProfileType(req.body.profile_type);
   const updates: Partial<User> = {};
   for (const key of allowed) {
     if (req.body[key] !== undefined) {
@@ -504,19 +542,46 @@ api.get("/admin/challenges", requireAdmin, async (req, res) => {
 });
 
 api.patch("/admin/challenges/:cid", requireAdmin, async (req, res) => {
-  const { deadline } = req.body || {};
-  const d = new Date(deadline);
-  if (!deadline || isNaN(d.getTime())) {
-    return res.status(400).json({ detail: "Please choose a valid deadline date." });
+  const body = req.body || {};
+  const updates: any = {};
+
+  // Text fields
+  for (const key of ["title", "org", "category", "difficulty", "est_time", "description", "problem_statement", "contact_email"]) {
+    if (key in body) {
+      const v = String(body[key] ?? "").trim();
+      if (["title", "org", "category"].includes(key) && !v) {
+        return res.status(400).json({ detail: `${key === "org" ? "Organisation" : key[0].toUpperCase() + key.slice(1)} can't be empty.` });
+      }
+      updates[key] = v;
+    }
   }
-  if (isChallengeExpired({ deadline: d.toISOString() })) {
-    return res.status(400).json({ detail: "The new deadline must be today or later." });
+  if ("difficulty" in updates && !["Beginner", "Intermediate", "Advanced"].includes(updates.difficulty)) {
+    return res.status(400).json({ detail: "Difficulty must be Beginner, Intermediate or Advanced." });
   }
-  const updated = await updateChallenge(req.params.cid, { deadline: d.toISOString() });
+  // Lists (one item per line, or comma separated)
+  for (const key of ["deliverables", "rubric", "tags"]) {
+    if (key in body) updates[key] = toList(body[key]);
+  }
+  // Deadline
+  if ("deadline" in body) {
+    const d = new Date(body.deadline);
+    if (!body.deadline || isNaN(d.getTime())) {
+      return res.status(400).json({ detail: "Please choose a valid deadline date." });
+    }
+    if (isChallengeExpired({ deadline: d.toISOString() })) {
+      return res.status(400).json({ detail: "The new deadline must be today or later." });
+    }
+    updates.deadline = d.toISOString();
+  }
+  if (Object.keys(updates).length === 0) {
+    return res.status(400).json({ detail: "Nothing to update." });
+  }
+
+  const updated = await updateChallenge(req.params.cid, updates);
   if (!updated) {
     return res.status(404).json({ detail: "Challenge not found" });
   }
-  return res.json({ ok: true, deadline: updated.deadline });
+  return res.json({ ok: true, challenge: public_challenge(updated) });
 });
 
 api.post("/admin/challenges/practice", requireAdmin, async (req, res) => {
@@ -921,8 +986,8 @@ api.post(["/admin/pending-challenges/:pid/approve", "/admin/proposals/:pid/appro
     tags: [pc.category],
     description: (pc.problem_description || "").slice(0, 200),
     problem_statement: pc.problem_description,
-    deliverables: (pc.deliverables || "").split(",").map((d) => d.trim()).filter(Boolean),
-    rubric: (pc.evaluation_criteria || "").split(",").map((r) => r.trim()).filter(Boolean),
+    deliverables: toList(pc.deliverables),
+    rubric: toList(pc.evaluation_criteria),
     status: "active",
     contact_email: pc.contact_email,
     created_at: now_iso(),

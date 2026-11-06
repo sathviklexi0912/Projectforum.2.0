@@ -113,6 +113,10 @@ export default function SubmitChallenge() {
                   <option value="Finance">Finance</option>
                   <option value="Strategy">Strategy</option>
                   <option value="Tech">Tech</option>
+                  <option value="Entrepreneurship">Entrepreneurship</option>
+                  <option value="Operations">Operations</option>
+                  <option value="Design">Design</option>
+                  <option value="Data & AI">Data &amp; AI</option>
                 </select>
               </div>
 

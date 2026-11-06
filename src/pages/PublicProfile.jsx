@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { User, GraduationCap, Linkedin, Award, ExternalLink, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { User, GraduationCap, Briefcase, Linkedin, Award, ExternalLink, ShieldCheck, CheckCircle2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { api } from "@/lib/api";
 import usePageTitle from "@/lib/usePageTitle";
+import { useAuth } from "@/context/AuthContext";
+import ShareProfile from "@/components/ShareProfile";
+import { profileSubtitle } from "@/components/ProfileTypeFields";
 
 export default function PublicProfile() {
   const { student_id } = useParams();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const { user: me } = useAuth();
   usePageTitle(profile?.user?.name ? `${profile.user.name}'s profile` : "Profile");
 
   useEffect(() => {
@@ -74,10 +78,12 @@ export default function PublicProfile() {
                   {user.headline || "ProjectForum contributor"}
                 </p>
 
-                {(user.university || user.year) && (
-                  <p className="text-xs mt-1 flex items-center gap-1.5" style={{ color: "var(--pf-muted)" }}>
-                    <GraduationCap className="w-4 h-4 text-[var(--pf-secondary)]" />
-                    {[user.university, user.degree, user.year].filter(Boolean).join(" • ")}
+                {(user.university || profileSubtitle(user)) && (
+                  <p className="text-xs mt-1 flex items-center gap-1.5" style={{ color: "var(--pf-muted)" }} data-testid="profile-subtitle">
+                    {user.profile_type === "professional"
+                      ? <Briefcase className="w-4 h-4 text-[var(--pf-secondary)]" />
+                      : <GraduationCap className="w-4 h-4 text-[var(--pf-secondary)]" />}
+                    {[profileSubtitle(user), user.university, user.profile_type !== "professional" ? user.degree : ""].filter(Boolean).join(" • ")}
                   </p>
                 )}
               </div>
@@ -96,6 +102,8 @@ export default function PublicProfile() {
             )}
           </div>
         </div>
+
+        {me && me.id === user.id && <ShareProfile name={user.name} />}
 
         {/* Portfolio Projects / Challenge Submissions */}
         <div className="space-y-8">

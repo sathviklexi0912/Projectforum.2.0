@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CalendarClock, Trash2, Users, LayoutList, Plus, Check, X } from "lucide-react";
+import { CalendarClock, Trash2, Users, LayoutList, Plus, Check, X, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 
@@ -75,7 +75,84 @@ function StatusPill({ expired, status }) {
   );
 }
 
+const asLines = (v) => (Array.isArray(v) ? v : []).join("\n");
+
+/* Full edit form for one challenge. */
+function ChallengeEditForm({ c, headers, onSaved, onCancel }) {
+  const [f, setF] = useState({
+    title: c.title || "",
+    org: c.org || "",
+    category: c.category || "",
+    difficulty: c.difficulty || "Intermediate",
+    est_time: c.est_time || "",
+    contact_email: c.contact_email || "",
+    description: c.description || "",
+    problem_statement: c.problem_statement || "",
+    deliverables: asLines(c.deliverables),
+    rubric: asLines(c.rubric),
+    tags: (Array.isArray(c.tags) ? c.tags : []).join(", "),
+  });
+  const [saving, setSaving] = useState(false);
+  const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
+  const field = (k, label, props = {}) => (
+    <label className="grid gap-1 text-xs font-semibold" style={{ color: "var(--pf-muted)" }}>
+      {label}
+      {props.rows ? (
+        <textarea value={f[k]} onChange={set(k)} className="pf-input !text-sm" rows={props.rows} data-testid={`edit-${k}-${c.id}`} placeholder={props.placeholder} />
+      ) : (
+        <input value={f[k]} onChange={set(k)} className="pf-input !text-sm" type={props.type || "text"} data-testid={`edit-${k}-${c.id}`} placeholder={props.placeholder} />
+      )}
+    </label>
+  );
+
+  const save = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await api.patch(`/admin/challenges/${c.id}`, f, { headers });
+      toast.success("Challenge updated");
+      onSaved();
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || "Could not save the changes");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <form onSubmit={save} className="grid gap-3 mt-4 pt-4 border-t" style={{ borderColor: "var(--pf-rule)" }} data-testid={`edit-form-${c.id}`}>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {field("title", "Title")}
+        {field("org", "Organisation")}
+        {field("category", "Category", { placeholder: "Marketing, Finance, Strategy, Tech…" })}
+        <label className="grid gap-1 text-xs font-semibold" style={{ color: "var(--pf-muted)" }}>
+          Difficulty
+          <select value={f.difficulty} onChange={set("difficulty")} className="pf-input !text-sm" data-testid={`edit-difficulty-${c.id}`}>
+            <option>Beginner</option><option>Intermediate</option><option>Advanced</option>
+          </select>
+        </label>
+        {field("est_time", "Estimated time", { placeholder: "8–12 hrs" })}
+        {field("contact_email", "Host contact email (private)", { type: "email" })}
+      </div>
+      {field("description", "Short description (shown on cards)", { rows: 2 })}
+      {field("problem_statement", "Problem statement", { rows: 4 })}
+      <div className="grid gap-3 sm:grid-cols-2">
+        {field("deliverables", "Deliverables (one per line)", { rows: 4 })}
+        {field("rubric", "Judging criteria (one per line)", { rows: 4 })}
+      </div>
+      {field("tags", "Tags (comma separated)")}
+      <div className="flex flex-wrap gap-2">
+        <button type="submit" disabled={saving} className="pf-btn-primary !py-2 !px-4 !text-sm" data-testid={`edit-save-${c.id}`}>
+          {saving ? "Saving…" : "Save changes"}
+        </button>
+        <button type="button" onClick={onCancel} className="pf-btn-secondary !py-2 !px-4 !text-sm">Cancel</button>
+      </div>
+    </form>
+  );
+}
+
 function ChallengeRow({ c, headers, onChanged }) {
+  const [editing, setEditing] = useState(false);
   const [date, setDate] = useState(toInputDate(c.deadline));
   const [saving, setSaving] = useState(false);
   const changed = date && date !== toInputDate(c.deadline);
@@ -141,8 +218,23 @@ function ChallengeRow({ c, headers, onChanged }) {
         >
           {saving ? "Saving…" : "Save deadline"}
         </button>
+        <button
+          type="button"
+          onClick={() => setEditing((v) => !v)}
+          className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors hover:border-[var(--pf-primary)]"
+          style={{ borderColor: "var(--pf-card-border)" }}
+          aria-expanded={editing}
+          data-testid={`edit-challenge-${c.id}`}
+        >
+          <Pencil className="w-3.5 h-3.5" /> {editing ? "Close" : "Edit"}
+        </button>
         <ConfirmDelete label="Delete this challenge?" onConfirm={remove} testId={`delete-challenge-${c.id}`} />
       </div>
+      {editing && (
+        <div className="md:col-span-2">
+          <ChallengeEditForm c={c} headers={headers} onCancel={() => setEditing(false)} onSaved={() => { setEditing(false); onChanged(); }} />
+        </div>
+      )}
     </div>
   );
 }

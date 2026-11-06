@@ -44,3 +44,10 @@ export function initialsFromName(name = "") {
     .map((s) => s[0]?.toUpperCase() || "")
     .join("") || "?";
 }
+
+/* Category filter chips built from the challenges actually on the board, so new categories show up automatically. */
+export function categoryFilters(items = []) {
+  const cats = Array.from(new Set(items.map((c) => (c.category || "").trim()).filter(Boolean)));
+  cats.sort((a, b) => a.localeCompare(b));
+  return ["All", ...cats];
+}
