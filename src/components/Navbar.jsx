@@ -10,6 +10,7 @@ const LINKS = [
   { to: "/challenges", label: "Challenges", testId: "nav-challenges" },
   { to: "/talent", label: "Talent", testId: "nav-talent" },
   { to: "/submit-challenge", label: "Host a challenge", testId: "nav-host" },
+  { to: "/about", label: "About", testId: "nav-about" },
 ];
 
 export default function Navbar() {

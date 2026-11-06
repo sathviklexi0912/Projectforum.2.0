@@ -24,6 +24,7 @@ export default function Footer() {
           <span className="pf-kicker mb-1">Organisations</span>
           <Link to="/submit-challenge" className={link}>Host a challenge</Link>
           <Link to="/talent" className={link}>Talent directory</Link>
+          <Link to="/about" className={link}>About</Link>
         </nav>
       </div>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pb-8 pt-5 flex flex-wrap justify-between gap-2 text-xs border-t" style={{ color: "var(--pf-muted)", borderColor: "var(--pf-rule)" }}>

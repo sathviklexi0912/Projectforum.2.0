@@ -19,6 +19,7 @@ import ThankYou from "@/pages/ThankYou";
 import Admin from "@/pages/Admin";
 import TalentDirectory from "@/pages/TalentDirectory";
 import Legal from "@/pages/Legal";
+import About from "@/pages/About";
 import NotFound from "@/pages/NotFound";
 import { TERMS, PRIVACY } from "@/content/legal";
 
@@ -65,6 +66,7 @@ export default function App() {
             <Route path="/thank-you" element={<ThankYou />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/talent" element={<TalentDirectory />} />
+            <Route path="/about" element={<About />} />
             <Route path="/terms" element={<Legal doc={TERMS} otherLink={{ to: "/privacy", label: "Privacy Policy" }} />} />
             <Route path="/privacy" element={<Legal doc={PRIVACY} otherLink={{ to: "/terms", label: "Terms of Service" }} />} />
             <Route path="*" element={<NotFound />} />
