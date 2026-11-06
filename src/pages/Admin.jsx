@@ -26,6 +26,7 @@ import Footer from "@/components/Footer";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import usePageTitle from "@/lib/usePageTitle";
+import AdminManage from "@/components/AdminManage";
 
 export default function Admin() {
   const [adminPassword, setAdminPassword] = useState("");
@@ -359,6 +360,9 @@ export default function Admin() {
               </div>
             )}
           </section>
+
+          {/* Challenges & People (re-loads whenever proposals change, e.g. after an approval) */}
+          <AdminManage key={proposals.map((p) => p.id).join(",")} adminPassword={adminPassword} />
         </div>
       </main>
 

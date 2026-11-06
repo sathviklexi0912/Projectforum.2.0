@@ -19,6 +19,11 @@ import {
   updateUser,
   getAllUsers,
   getActiveChallenges,
+  getAllChallenges,
+  updateChallenge,
+  addPracticeChallenges,
+  isChallengeExpired,
+  deleteUserCascade,
   getChallengeById,
   createChallenge,
   deleteChallenge,
@@ -478,7 +483,68 @@ api.get("/challenges/:cid", async (req, res) => {
   if (!item) {
     return res.status(404).json({ detail: "Challenge not found" });
   }
-  return res.json(public_challenge(item));
+  return res.json({ ...public_challenge(item), is_closed: item.status !== "active" || isChallengeExpired(item) });
+});
+
+// ---------- Admin: manage challenges ----------
+api.get("/admin/challenges", requireAdmin, async (req, res) => {
+  const [items, subs] = await Promise.all([getAllChallenges(), getAllSubmissions()]);
+  return res.json(
+    items.map((c: any) => {
+      const plain = typeof c.toObject === "function" ? c.toObject() : { ...c };
+      delete plain._id;
+      delete plain.__v;
+      return {
+        ...plain,
+        is_expired: isChallengeExpired(c),
+        submissions_count: subs.filter((s) => s.challenge_id === c.id).length,
+      };
+    })
+  );
+});
+
+api.patch("/admin/challenges/:cid", requireAdmin, async (req, res) => {
+  const { deadline } = req.body || {};
+  const d = new Date(deadline);
+  if (!deadline || isNaN(d.getTime())) {
+    return res.status(400).json({ detail: "Please choose a valid deadline date." });
+  }
+  if (isChallengeExpired({ deadline: d.toISOString() })) {
+    return res.status(400).json({ detail: "The new deadline must be today or later." });
+  }
+  const updated = await updateChallenge(req.params.cid, { deadline: d.toISOString() });
+  if (!updated) {
+    return res.status(404).json({ detail: "Challenge not found" });
+  }
+  return res.json({ ok: true, deadline: updated.deadline });
+});
+
+api.post("/admin/challenges/practice", requireAdmin, async (req, res) => {
+  const added = await addPracticeChallenges();
+  return res.json({ ok: true, added });
+});
+
+// ---------- Admin: manage people ----------
+api.get("/admin/users", requireAdmin, async (req, res) => {
+  const [users, subs, projects] = await Promise.all([getAllUsers(), getAllSubmissions(), getAllProjects()]);
+  return res.json(
+    users
+      .map((u) => ({
+        ...serialize_user(u),
+        submissions_count: subs.filter((s) => s.student_id === u.id).length,
+        verified_count: subs.filter((s) => s.student_id === u.id && s.verified).length,
+        projects_count: projects.filter((p) => p.student_id === u.id).length,
+      }))
+      .sort((a: any, b: any) => String(b.created_at).localeCompare(String(a.created_at)))
+  );
+});
+
+api.delete("/admin/users/:uid", requireAdmin, async (req, res) => {
+  const result = await deleteUserCascade(req.params.uid);
+  if (!result.deleted) {
+    return res.status(404).json({ detail: "Person not found" });
+  }
+  return res.json({ ok: true, ...result });
 });
 
 api.delete("/admin/challenges/:cid", requireAdmin, async (req, res) => {
@@ -496,6 +562,9 @@ api.post("/submissions", getCurrentUser, async (req: AuthenticatedRequest, res) 
   const challenge = await getChallengeById(challenge_id);
   if (!challenge) {
     return res.status(404).json({ detail: "Challenge not found" });
+  }
+  if (challenge.status !== "active" || isChallengeExpired(challenge)) {
+    return res.status(400).json({ detail: "This challenge is closed and no longer accepts submissions." });
   }
   const subId = crypto.randomUUID();
   const sub: Submission = {

@@ -99,14 +99,24 @@ export default function ChallengeDetail() {
               ))}
             </div>
 
-            <Link
-              to={`/submit/${challenge.id}`}
-              className="pf-btn-primary text-sm py-3 px-6 shadow-md"
-              data-testid="submit-solution-btn"
-            >
-              <Send className="w-4 h-4" />
-              <span>Submit Solution</span>
-            </Link>
+            {challenge.is_closed ? (
+              <span
+                className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-3 rounded-[10px] border"
+                style={{ borderColor: "var(--pf-card-border)", color: "var(--pf-muted)", background: "var(--pf-tag-bg)" }}
+                data-testid="challenge-closed"
+              >
+                This challenge is closed
+              </span>
+            ) : (
+              <Link
+                to={`/submit/${challenge.id}`}
+                className="pf-btn-primary text-sm py-3 px-6 shadow-md"
+                data-testid="submit-solution-btn"
+              >
+                <Send className="w-4 h-4" />
+                <span>Submit Solution</span>
+              </Link>
+            )}
           </div>
         </div>
 

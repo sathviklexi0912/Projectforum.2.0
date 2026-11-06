@@ -31,7 +31,13 @@
 - Admin link removed from the footer (still reachable at /admin).
 - Added `render.yaml` (one-click Render setup) and `.env.example`.
 
+## Admin tools (Nov 2026)
+- Challenges panel: see every challenge (live and expired), move a deadline, delete a challenge, and "Add practice challenges" (adds any built-in practice brief that isn't on the board).
+- People panel: everyone who has signed up, with their work counts; delete a person (also removes their submissions and projects).
+- Challenges are hidden from the site automatically after their deadline day (India time) and stop accepting submissions; the challenge page says "This challenge is closed".
+- Public pages no longer include anyone's email address or a host's contact email.
+
 ## Still open
 - Signup 18+/terms checkbox and © line (with the legal documents).
-- Seeded "Demo Student" account (demo@projectforum.com) with a public password, plus made-up seed company names.
+- Made-up seed company names on the practice challenges.
 - Password-reset emails only reach the Resend account owner until a domain is verified.

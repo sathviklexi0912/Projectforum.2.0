@@ -434,6 +434,25 @@ export async function updateUser(id: string, updates: Partial<User>): Promise<Us
   return u;
 }
 
+// Deletes a person and their submissions, projects and any pending reset code.
+export async function deleteUserCascade(id: string): Promise<{ deleted: boolean; submissions: number; projects: number }> {
+  const user = await findUserById(id);
+  if (!user) return { deleted: false, submissions: 0, projects: 0 };
+  if (isMongoConnected) {
+    const subs = await SubmissionModel.deleteMany({ student_id: id });
+    const projs = await ProjectModel.deleteMany({ student_id: id });
+    await ResetTokenModel.deleteOne({ email: user.email });
+    await UserModel.deleteOne({ id });
+    return { deleted: true, submissions: subs.deletedCount || 0, projects: projs.deletedCount || 0 };
+  }
+  let submissions = 0, projects = 0;
+  for (const [k, v] of memorySubmissions) if (v.student_id === id) { memorySubmissions.delete(k); submissions++; }
+  for (const [k, v] of memoryProjects) if (v.student_id === id) { memoryProjects.delete(k); projects++; }
+  memoryResetTokens.delete(user.email);
+  memoryUsers.delete(id);
+  return { deleted: true, submissions, projects };
+}
+
 export async function getAllUsers(): Promise<User[]> {
   if (isMongoConnected) {
     const users = await UserModel.find().lean();
@@ -450,14 +469,79 @@ export async function getActiveChallenges(category?: string): Promise<Challenge[
       query.category = { $regex: new RegExp(`^${category}$`, "i") };
     }
     const items = await ChallengeModel.find(query).sort({ created_at: -1 }).lean();
-    return items as Challenge[];
+    return (items as Challenge[]).filter((c) => !isChallengeExpired(c));
   }
-  let items = Array.from(memoryChallenges.values()).filter((c) => c.status === "active");
+  let items = Array.from(memoryChallenges.values()).filter((c) => c.status === "active" && !isChallengeExpired(c));
   if (category && category.toLowerCase() !== "all") {
     items = items.filter((c) => c.category.toLowerCase() === category.toLowerCase());
   }
   items.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   return items;
+}
+
+// A challenge is open until the end of its deadline day (India time).
+export function isChallengeExpired(c: Pick<Challenge, "deadline">): boolean {
+  if (!c?.deadline) return false;
+  const d = new Date(c.deadline);
+  if (isNaN(d.getTime())) return false;
+  const IST_OFFSET = 5.5 * 3600000;
+  // The calendar day of the deadline as seen in India...
+  const ist = new Date(d.getTime() + IST_OFFSET);
+  // ...and the last millisecond of that day, converted back to real time.
+  const endOfDay = Date.UTC(ist.getUTCFullYear(), ist.getUTCMonth(), ist.getUTCDate(), 23, 59, 59, 999) - IST_OFFSET;
+  return Date.now() > endOfDay;
+}
+
+// Every challenge, including expired and closed ones (admin view).
+export async function getAllChallenges(): Promise<Challenge[]> {
+  if (isMongoConnected) {
+    const items = await ChallengeModel.find({}).sort({ created_at: -1 }).lean();
+    return items as Challenge[];
+  }
+  return Array.from(memoryChallenges.values()).sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
+}
+
+export async function updateChallenge(id: string, updates: Partial<Challenge>): Promise<Challenge | null> {
+  if (isMongoConnected) {
+    const updated = await ChallengeModel.findOneAndUpdate({ id }, { $set: updates }, { new: true }).lean();
+    return updated as Challenge | null;
+  }
+  const c = memoryChallenges.get(id);
+  if (!c) return null;
+  const merged = { ...c, ...updates };
+  memoryChallenges.set(id, merged);
+  return merged;
+}
+
+// Adds any built-in practice challenge whose title isn't on the board yet. Returns how many were added.
+export async function addPracticeChallenges(): Promise<number> {
+  const existing = new Set((await getAllChallenges()).map((c) => c.title.trim().toLowerCase()));
+  const now = new Date();
+  let added = 0;
+  for (const sc of SEED_CHALLENGES) {
+    if (existing.has(sc.title.trim().toLowerCase())) continue;
+    await createChallenge({
+      id: crypto.randomUUID(),
+      title: sc.title,
+      org: sc.org,
+      category: sc.category,
+      difficulty: sc.difficulty,
+      deadline: new Date(now.getTime() + sc.deadline_days * 86400000).toISOString(),
+      est_time: sc.est_time,
+      tags: sc.tags,
+      description: sc.description,
+      problem_statement: sc.problem_statement,
+      deliverables: sc.deliverables,
+      rubric: sc.rubric,
+      status: "active",
+      contact_email: "",
+      created_at: now_iso(),
+    });
+    added += 1;
+  }
+  return added;
 }
 
 export async function getChallengeById(id: string): Promise<Challenge | null> {
