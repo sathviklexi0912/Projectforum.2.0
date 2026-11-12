@@ -48,6 +48,7 @@ import {
   setResetToken,
   getResetToken,
   deleteResetToken,
+  isPracticeChallenge,
 } from "./src/db.js";
 import { sendPasswordResetEmail } from "./src/lib/email.js";
 
@@ -219,6 +220,7 @@ function public_challenge(c: any) {
   delete plain.contact_email;
   delete plain._id;
   delete plain.__v;
+  plain.is_practice = isPracticeChallenge(plain);
   return plain;
 }
 
@@ -674,7 +676,8 @@ api.post("/submissions", getCurrentUser, async (req: AuthenticatedRequest, res) 
     student_university: user.university || "",
     challenge_id,
     challenge_title: challenge.title || "",
-    challenge_org: challenge.org || "",
+    // Practice briefs use fictional companies, so the profile credits KIVO instead.
+    challenge_org: isPracticeChallenge(challenge) ? "KIVO practice brief" : challenge.org || "",
     submission_link,
     explanation,
     time_spent,

@@ -9,7 +9,7 @@ export default function Footer() {
         <div>
           <Logo />
           <p className="mt-3 max-w-[34ch] text-[.95rem]" style={{ color: "var(--pf-muted)" }}>
-            Real briefs from organisations. Verified work from people who want to prove their skills.
+            Business briefs, reviewed work, and one profile that shows what you can do.
           </p>
         </div>
 

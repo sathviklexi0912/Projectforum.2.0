@@ -88,7 +88,7 @@ export default function SubmissionForm() {
             <span className="pf-tag mb-2 inline-block">Submitting to</span>
             <h1 className="font-display text-3xl font-extrabold">{challenge?.title}</h1>
             <p className="text-sm mt-1" style={{ color: "var(--pf-muted)" }}>
-              Hosted by <strong className="text-[var(--pf-text)]">{challenge?.org}</strong>
+              {challenge?.is_practice ? "Practice brief · reviewed by the KIVO team" : <>Hosted by <strong className="text-[var(--pf-text)]">{challenge?.org}</strong></>}
             </p>
           </div>
 

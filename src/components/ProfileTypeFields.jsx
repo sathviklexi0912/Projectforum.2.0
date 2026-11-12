@@ -25,7 +25,7 @@ const Label = ({ children, htmlFor }) => (
   </label>
 );
 
-export default function ProfileTypeFields({ value, onChange, idPrefix = "pt" }) {
+export default function ProfileTypeFields({ value, onChange, idPrefix = "pt", choiceOnly = false }) {
   const set = (k) => (e) => onChange({ ...value, [k]: e.target.value });
   const type = value.profile_type || "student";
   return (
@@ -59,7 +59,7 @@ export default function ProfileTypeFields({ value, onChange, idPrefix = "pt" }) 
         </div>
       </fieldset>
 
-      {type === "professional" ? (
+      {choiceOnly ? null : type === "professional" ? (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-[1fr_130px] gap-3">
             <div>
@@ -84,7 +84,7 @@ export default function ProfileTypeFields({ value, onChange, idPrefix = "pt" }) 
           <div>
             <Label htmlFor={`${idPrefix}-uni`}>{type === "graduate" ? "Institution you graduated from" : "University / college"}</Label>
             <input id={`${idPrefix}-uni`} type="text" value={value.university || ""} onChange={set("university")}
-              placeholder="CHRIST University" className="pf-input" data-testid={`${idPrefix}-university-input`} />
+              placeholder="e.g. Your college name" className="pf-input" data-testid={`${idPrefix}-university-input`} />
           </div>
           <div>
             <Label htmlFor={`${idPrefix}-year`}>{type === "graduate" ? "Graduation year" : "Year of study"}</Label>

@@ -69,7 +69,7 @@ function BriefDeck({ items }) {
                 <DifficultyBadge difficulty={c.difficulty} />
               </div>
               <p className="font-display font-semibold text-[1.4rem] leading-[1.15] tracking-[-.025em]">{c.title}</p>
-              <p className="text-sm font-semibold" style={{ color: "var(--pf-muted)" }}>Hosted by {c.org}</p>
+              <p className="text-sm font-semibold" style={{ color: "var(--pf-muted)" }}>{c.is_practice ? "Practice brief · by KIVO" : `Hosted by ${c.org}`}</p>
               <div className="flex flex-wrap gap-1.5">
                 {(c.deliverables || []).slice(0, 3).map((d) => <span key={d} className="pf-tag">{d}</span>)}
               </div>
@@ -91,9 +91,9 @@ function BriefDeck({ items }) {
 }
 
 const STEPS = [
-  { icon: Compass, title: "Pick a brief", text: "Every challenge has a real problem, the deliverables and the rubric it's judged on." },
+  { icon: Compass, title: "Pick a brief", text: "Every challenge sets out a business problem, what to hand in and the rubric it's judged on." },
   { icon: FileText, title: "Do the work", text: "Submit your deck, model or repository with a short note on your approach." },
-  { icon: BadgeCheck, title: "Get verified", text: "The host reviews it. Verified work goes on your public profile with their name on it." },
+  { icon: BadgeCheck, title: "Get verified", text: "Your work is reviewed by the host, or by the KIVO team for practice briefs. Verified work goes on your profile with the reviewer's name." },
 ];
 
 export default function Landing() {
@@ -123,7 +123,7 @@ export default function Landing() {
         <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 md:pt-16 pb-14 grid lg:grid-cols-[1.1fr_1fr] gap-12 lg:gap-10 items-center">
           <div className="pf-fade-up">
             <span className="pf-sticker">
-              <span className="pf-dot" aria-hidden="true" /> Now live · Bengaluru
+              <span className="pf-dot" aria-hidden="true" /> Early access · Bengaluru
             </span>
 
             <h1 className="font-display text-[clamp(2.5rem,5.6vw,4.3rem)] mt-6 max-w-[16ch]">
@@ -131,7 +131,7 @@ export default function Landing() {
             </h1>
 
             <p className="mt-6 text-[1.12rem] max-w-[46ch]" style={{ color: "var(--pf-muted)" }}>
-              KIVO connects people who want to demonstrate their abilities with organisations that have real problems to solve. Complete a brief, have your work verified by the host, and build a profile that speaks for you.
+              KIVO connects people who want to show what they can do with organisations that have problems to solve. Complete a brief, get your work reviewed, and build a profile that speaks for you.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -144,7 +144,7 @@ export default function Landing() {
             </div>
 
             <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium" style={{ color: "var(--pf-muted)" }}>
-              {["Free to join", "Work verified by the host", "One profile to share"].map((t) => (
+              {["Free to join", "Every submission reviewed", "One profile to share"].map((t) => (
                 <li key={t} className="inline-flex items-center gap-1.5">
                   <Check className="w-4 h-4" style={{ color: "var(--pf-ok)" }} />
                   {t}
@@ -173,25 +173,8 @@ export default function Landing() {
           </div>
         )}
 
-        {/* ---------- STATS ---------- */}
-        <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-14">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              [loading ? "–" : String(all.length), "challenges open now"],
-              [loading ? "–" : String(Math.max(0, categories.length - 1)), "fields to work in"],
-              ["₹0", "to join as a contributor"],
-              ["1", "profile that holds your verified work"],
-            ].map(([n, c], i) => (
-              <div key={c} className="pf-card p-5" data-reveal={i}>
-                <div className="font-display font-bold text-[2.4rem] leading-none tracking-[-.035em] tabular-nums">{n}</div>
-                <div className="text-sm mt-1.5 font-medium" style={{ color: "var(--pf-muted)" }}>{c}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-
         {/* ---------- HOW IT WORKS ---------- */}
-        <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-24">
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-16 md:pt-20">
           <div className="max-w-2xl" data-reveal>
             <span className="pf-kicker">How it works</span>
             <h2 className="font-display text-[clamp(2rem,4.2vw,3rem)] leading-[1.05] mt-2">Three steps from brief to proof.</h2>
@@ -264,16 +247,16 @@ export default function Landing() {
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
               {shown.map((c, i) => (
-                <div key={c.id} data-reveal={i % 3} className="flex [&>a]:flex-1">
+                <div key={c.id} data-reveal={i % 3} className={`${i >= 3 ? "hidden md:flex" : "flex"} [&>a]:flex-1`}>
                   <ChallengeCard challenge={c} />
                 </div>
               ))}
             </div>
           )}
 
-          {all.length > shown.length && (
+          {all.length > 3 && (
             <div className="mt-8 flex justify-center">
-              <Link to="/challenges" className="pf-btn-secondary">See all {all.length} challenges <ArrowRight className="w-4 h-4" /></Link>
+              <Link to="/challenges" className={`pf-btn-secondary ${all.length > shown.length ? "" : "md:hidden"}`}>See all {all.length} challenges <ArrowRight className="w-4 h-4" /></Link>
             </div>
           )}
         </section>
@@ -290,7 +273,7 @@ export default function Landing() {
                 icon: GraduationCap, label: "Contributors", head: "Show what you can do, not just what you've studied.",
                 sub: "Students, graduates, working professionals and career-switchers.",
                 bg: "var(--pf-primary)", fg: "var(--pf-on-primary)",
-                points: [[Compass, "Real briefs from real organisations"], [BadgeCheck, "Work verified by the host, with their name on it"], [Link2, "One profile to share with any employer"]],
+                points: [[Compass, "Briefs built around real business problems"], [BadgeCheck, "Every submission reviewed, verified work signed by the reviewer"], [Link2, "One profile to share with any employer"]],
                 cta: [user ? "Find a challenge" : "Create your profile", user ? "/challenges" : "/signup"],
               },
               {
@@ -329,15 +312,15 @@ export default function Landing() {
 
         {/* ---------- CLOSING ---------- */}
         <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-24">
-          <div className="pf-card p-8 sm:p-12 text-center relative overflow-hidden" style={{ background: "var(--pf-text)", color: "var(--pf-bg)" }} data-reveal>
-            <h2 className="font-display text-[clamp(2rem,4.6vw,3.2rem)] leading-[1.06] max-w-[20ch] mx-auto" style={{ color: "var(--pf-bg)" }}>
+          <div className="pf-card p-8 sm:p-12 text-center relative overflow-hidden" style={{ background: "color-mix(in srgb, var(--pf-primary) 13%, var(--pf-card-bg))", borderColor: "color-mix(in srgb, var(--pf-primary) 45%, transparent)" }} data-reveal>
+            <h2 className="font-display text-[clamp(2rem,4.6vw,3.2rem)] leading-[1.06] max-w-[20ch] mx-auto">
               Start building a verified record of your work.
             </h2>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link to={user ? "/challenges" : "/signup"} className="pf-btn-primary !text-base !px-6 !py-3.5">
                 {user ? "Browse challenges" : "Create a free profile"} <ArrowRight className="w-4 h-4" />
               </Link>
-              <Link to="/submit-challenge" className="inline-flex items-center gap-2 font-semibold px-6 py-3.5 rounded-[10px] border" style={{ borderColor: "color-mix(in srgb, var(--pf-bg) 40%, transparent)", color: "var(--pf-bg)" }}>
+              <Link to="/submit-challenge" className="pf-btn-secondary !text-base !px-6 !py-3.5">
                 Post a challenge
               </Link>
             </div>

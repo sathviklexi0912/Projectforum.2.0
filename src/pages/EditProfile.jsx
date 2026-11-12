@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { ArrowLeft, User, GraduationCap, Linkedin, Award, Save } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -12,6 +12,8 @@ export default function EditProfile() {
   const { user, updateProfile } = useAuth();
   const navigate = useNavigate();
   usePageTitle("Edit profile");
+  const [params] = useSearchParams();
+  const welcome = params.get("welcome") === "1";
   const [formData, setFormData] = useState({
     name: "",
     headline: "",
@@ -83,7 +85,13 @@ export default function EditProfile() {
         </Link>
 
         <div className="pf-card p-8 sm:p-10">
-          <h1 className="font-display text-3xl font-extrabold mb-6">Edit profile</h1>
+          <h1 className="font-display text-3xl font-extrabold mb-2">{welcome ? "Finish your profile" : "Edit profile"}</h1>
+          {welcome ? (
+            <p className="text-sm mb-6" style={{ color: "var(--pf-muted)" }} data-testid="welcome-note">
+              Recruiters see this on your public profile. Add what you can now, and skip anything you want to fill in later.{" "}
+              <Link to="/challenges" className="pf-link">Skip for now</Link>
+            </p>
+          ) : <div className="mb-4" />}
 
           <form onSubmit={handleSubmit} className="space-y-5" data-testid="edit-profile-form">
             <div>

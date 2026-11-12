@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { toast } from "sonner";
-import { User, Mail, Lock, Linkedin } from "lucide-react";
+import { User, Mail, Lock } from "lucide-react";
 import usePageTitle from "@/lib/usePageTitle";
 import ProfileTypeFields from "@/components/ProfileTypeFields";
 
@@ -41,8 +41,8 @@ export default function SignUp() {
     setLoading(true);
     try {
       await register({ ...formData, accept_terms: true });
-      toast.success("Account created successfully!");
-      navigate("/dashboard");
+      toast.success("Account created. Add a few details so people can find you.");
+      navigate("/edit-profile?welcome=1");
     } catch (err) {
       toast.error(err?.response?.data?.detail || "Registration failed");
     } finally {
@@ -58,7 +58,7 @@ export default function SignUp() {
           <div className="text-center mb-8">
             <h1 className="font-display text-3xl font-bold">Create your profile</h1>
             <p className="text-sm mt-2" style={{ color: "var(--pf-muted)" }}>
-              Show organisations and hiring teams what you can do
+              Takes under a minute. You can add your college, LinkedIn and headline next.
             </p>
           </div>
 
@@ -123,40 +123,7 @@ export default function SignUp() {
               <p className="text-xs mt-1.5" style={{ color: "var(--pf-muted)" }}>Use at least 8 characters.</p>
             </div>
 
-            <ProfileTypeFields value={formData} onChange={setFormData} idPrefix="signup" />
-
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: "var(--pf-muted)" }}>
-                Headline / One-liner
-              </label>
-              <input
-                type="text"
-                name="headline"
-                value={formData.headline}
-                onChange={handleChange}
-                placeholder="e.g. Marketing student who loves go-to-market problems"
-                data-testid="signup-headline-input"
-                className="pf-input"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: "var(--pf-muted)" }}>
-                LinkedIn Profile URL
-              </label>
-              <div className="relative">
-                <Linkedin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "var(--pf-muted)" }} />
-                <input
-                  type="url"
-                  name="linkedin"
-                  value={formData.linkedin}
-                  onChange={handleChange}
-                  placeholder="https://linkedin.com/in/username"
-                  data-testid="signup-linkedin-input"
-                  className="pf-input pl-10"
-                />
-              </div>
-            </div>
+            <ProfileTypeFields value={formData} onChange={setFormData} idPrefix="signup" choiceOnly />
 
             <label className="flex items-start gap-3 text-sm pt-2 cursor-pointer" htmlFor="signup-accept-terms">
               <input

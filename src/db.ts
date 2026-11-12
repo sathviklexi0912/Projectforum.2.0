@@ -337,6 +337,12 @@ const SEED_CHALLENGES = [
   },
 ];
 
+// Built-in briefs are practice scenarios written by KIVO; the companies named in them are fictional.
+const PRACTICE_TITLES = new Set(SEED_CHALLENGES.map((c) => c.title.trim().toLowerCase()));
+export function isPracticeChallenge(c: { title?: string } | null | undefined): boolean {
+  return !!c?.title && PRACTICE_TITLES.has(c.title.trim().toLowerCase());
+}
+
 function now_iso(): string {
   return new Date().toISOString();
 }

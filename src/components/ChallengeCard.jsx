@@ -29,6 +29,26 @@ export function categoryColors(cat) {
   return CAT[cat] || ["#e7e8f0", "#33364f"];
 }
 
+/* Practice briefs are written by KIVO around fictional companies, so we say so instead of implying a real host. */
+export function HostLine({ challenge, initials }) {
+  if (challenge.is_practice) {
+    return (
+      <div className="flex items-center gap-2.5 min-w-0">
+        <span className="w-7 h-7 rounded-md grid place-items-center text-[.68rem] font-bold shrink-0" style={{ background: "var(--pf-primary)", color: "var(--pf-on-primary)" }}>K</span>
+        <span className="text-sm font-semibold truncate" style={{ color: "var(--pf-muted)" }}>Practice brief · by KIVO</span>
+      </div>
+    );
+  }
+  return (
+    <div className="flex items-center gap-2.5 min-w-0">
+      <span className="w-7 h-7 rounded-md grid place-items-center text-[.68rem] font-bold border shrink-0" style={{ borderColor: "var(--pf-card-border)" }}>
+        {initials}
+      </span>
+      <span className="text-sm font-semibold truncate" style={{ color: "var(--pf-muted)" }}>{challenge.org}</span>
+    </div>
+  );
+}
+
 export default function ChallengeCard({ challenge, testId }) {
   const days = daysRemaining(challenge.deadline);
   const initials = initialsFromName(challenge.org);
@@ -51,12 +71,7 @@ export default function ChallengeCard({ challenge, testId }) {
         {challenge.title}
       </h3>
 
-      <div className="flex items-center gap-2.5 min-w-0">
-        <span className="w-7 h-7 rounded-md grid place-items-center text-[.68rem] font-bold border shrink-0" style={{ borderColor: "var(--pf-card-border)" }}>
-          {initials}
-        </span>
-        <span className="text-sm font-semibold truncate" style={{ color: "var(--pf-muted)" }}>{challenge.org}</span>
-      </div>
+      <HostLine challenge={challenge} initials={initials} />
 
       <p className="text-[.92rem] leading-relaxed line-clamp-2" style={{ color: "var(--pf-muted)" }}>
         {challenge.description}

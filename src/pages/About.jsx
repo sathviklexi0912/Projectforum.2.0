@@ -25,7 +25,7 @@ const PROBLEMS = [
 
 const BELIEFS = [
   ["Show, don't tell", "Work you've actually done beats any description of it."],
-  ["Real problems, not textbook cases", "Every challenge comes from an organisation with a real question to answer."],
+  ["Real problems, not textbook cases", "Challenges come from organisations with a real question to answer, plus practice briefs from KIVO while more hosts join."],
   ["Proof someone has checked", "Verified work carries the name and title of the person who reviewed it."],
   ["Open to everyone", "Students, graduates, professionals and career-switchers. Where you studied matters less than what you can do."],
 ];
@@ -43,8 +43,8 @@ export default function About() {
             Make your <span className="pf-mark">work</span> matter.
           </h1>
           <p className="mt-6 text-[1.12rem] max-w-[60ch]" style={{ color: "var(--pf-muted)" }}>
-            {BRAND_NAME} is a platform where organisations post real business problems and people solve them. The best work is verified by the
-            organisation and lands on a public profile, so the next person who looks at you sees proof of what you can do, not just a list of claims.
+            {BRAND_NAME} is a platform where organisations post real business problems and people solve them. The best work is verified by whoever reviews it
+            and lands on a public profile, so the next person who looks at you sees proof of what you can do, not just a list of claims.
           </p>
         </section>
 
@@ -71,7 +71,7 @@ export default function About() {
           <h2 className="font-display text-[clamp(1.9rem,4vw,2.7rem)] leading-[1.08] mt-2">From brief to proof in three steps.</h2>
           <ol className="mt-8 grid md:grid-cols-3 gap-5">
             {[
-              [Compass, "Pick a brief", "Choose a real problem posted by an organisation, with its deliverables and how it will be judged."],
+              [Compass, "Pick a brief", "Choose a problem posted by an organisation or a KIVO practice brief, with its deliverables and how it will be judged."],
               [FileText, "Do the work", "Submit your deck, model or repository, and explain how you approached it."],
               [BadgeCheck, "Get verified", "The host reviews it. Verified work appears on your profile with the reviewer's name and title."],
             ].map(([Icon, t, d], i) => (

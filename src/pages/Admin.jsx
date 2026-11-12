@@ -97,8 +97,9 @@ export default function Admin() {
 
   const handleOpenDetailModal = (sub) => {
     setSelectedSubmission(sub);
-    setVerifierName(sub.verifier_name || sub.challenge_org ? `${sub.challenge_org} Lead` : "Platform Admin");
-    setVerifierTitle(sub.verifier_title || "Verified Reviewer");
+    // Default to the KIVO team: you are the one reviewing, so never sign as the (possibly fictional) host.
+    setVerifierName(sub.verifier_name || "KIVO Review Team");
+    setVerifierTitle(sub.verifier_title || "Reviewer");
   };
 
   const handleCloseModal = () => {
